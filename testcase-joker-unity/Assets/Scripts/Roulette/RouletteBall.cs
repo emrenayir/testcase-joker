@@ -3,7 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RouletteBall : MonoBehaviour
+/// <summary>
+/// This script is responsible for rolling the ball on the roulette wheel.
+/// Movement is handled by the Rigidbody component.
+/// There are two main phases to the ball's movement:
+/// 1. Circle around the wheel
+/// 2. Approach the target slot
+/// The ball will circle the wheel for a period of time, then approach the target slot.
+/// The ball will bounce off the slot if it is not the target slot.
+/// The ball will settle on the target slot.
+/// </summary>
+public class RouletteBall : MonoBehaviour, IRouletteBall
 {
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform wheelCenter;
@@ -28,6 +38,10 @@ public class RouletteBall : MonoBehaviour
         public float duration;
     }
 
+    /// <summary>
+    /// Starts the rolling of the ball.
+    /// </summary>
+    /// <param name="targetNum">The number of the slot that the ball will land on.</param>
     public void StartRolling(int targetNum)
     {
         if (isRolling) return;
@@ -44,6 +58,7 @@ public class RouletteBall : MonoBehaviour
         StartCoroutine(RollBallCoroutine());
     }
 
+    // Use linq to find the index of the target slot
     private int FindTargetSlotIndex(int targetNum)
     {
         for (int i = 0; i < numberSlotPositions.Length; i++)
@@ -57,6 +72,7 @@ public class RouletteBall : MonoBehaviour
         Debug.LogError("Could not find slot with number: " + targetNum);
         return -1;
     }
+
 
     private void UpdateTargetPosition()
     {
@@ -135,7 +151,6 @@ public class RouletteBall : MonoBehaviour
             transform.position = newPosition;
 
             var distanceToTarget = Vector3.Distance(transform.position, targetPosition);
-            Debug.Log("Distance to target: " + distanceToTarget);
 
             if (distanceToTarget < targetApproachThreshold && elapsedTime > circlingTime * 0.3f)
             {

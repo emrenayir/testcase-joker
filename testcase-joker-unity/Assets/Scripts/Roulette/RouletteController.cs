@@ -1,5 +1,10 @@
+using System;
 using UnityEngine;
 
+/// <summary>
+/// This script is responsible for controlling the roulette wheel and ball.
+/// It also handles the outcome of the spin.
+/// </summary>
 public class RouletteController : MonoBehaviour
 {
     [SerializeField] private RouletteWheel wheel;
@@ -8,27 +13,42 @@ public class RouletteController : MonoBehaviour
     
     private bool isSpinning = false;
 
+    public Action OnSpinCompleted;
 
-    //for testing
+    private void Awake() 
+    {
+        OnSpinCompleted += () => 
+        {
+            Debug.Log("Spin completed");
+            isSpinning = false;
+        };
+    }
+
+    public void InvokeSpinCompleted()
+    {
+        OnSpinCompleted?.Invoke();
+    }
+
+
+    //TODO: this is for testing and will be removed later
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartSpin();
+            StartRoulette();
         }
     }
-    public void StartSpin()
+
+    /// <summary>
+    /// Starts the spin of the roulette wheel.
+    /// </summary>
+    public void StartRoulette()
     {
         if (isSpinning) return;
         
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
-        wheel.Spin();
         ball.StartRolling(targetNumber);
     }
     
-    public void OnSpinCompleted()
-    {
-        isSpinning = false;
-    }
 }
