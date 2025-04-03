@@ -21,10 +21,10 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
     [SerializeField] private RouletteSlot[] numberSlotPositions;
     [SerializeField] private float rollDuration = 8f;
     [SerializeField] private float wheelRadius = 2f;
-    [SerializeField] private float initialCirclingSpeed = 15f;
     [SerializeField] private float targetApproachThreshold = 10f;
     [SerializeField] private float maxBounceHeight = 0.15f;
 
+    private RouletteController rouletteController;
     private int targetNumber = -1;
     private bool isRolling = false;
     private Vector3 targetPosition;
@@ -36,6 +36,11 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         public float startTime;
         public float height;
         public float duration;
+    }
+
+    void Awake()
+    {
+        rouletteController = GetComponentInParent<RouletteController>();
     }
 
     /// <summary>
@@ -58,7 +63,7 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         StartCoroutine(RollBallCoroutine());
     }
 
-    // Use linq to find the index of the target slot
+    // TODO: Use linq to find the index of the target slot
     private int FindTargetSlotIndex(int targetNum)
     {
         for (int i = 0; i < numberSlotPositions.Length; i++)
@@ -87,10 +92,9 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         yield return ApproachTargetWithBounces();
         yield return SettleOnTarget();
         isRolling = false;
-        var rouletteController = GetComponentInParent<RouletteController>();
         if (rouletteController != null)
         {
-            rouletteController.OnSpinCompleted();
+            rouletteController.InvokeSpinCompleted();
         }
         else
         {

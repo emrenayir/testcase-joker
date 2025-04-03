@@ -13,20 +13,25 @@ public class RouletteController : MonoBehaviour
     
     private bool isSpinning = false;
 
-    public Action OnSpinCompleted;
+    private Action onSpinCompleted;
 
     private void Awake() 
     {
-        OnSpinCompleted += () => 
+        onSpinCompleted += () => 
         {
             Debug.Log("Spin completed");
             isSpinning = false;
         };
     }
 
+    void OnDestroy()
+    {
+        onSpinCompleted = null;
+    }
+
     public void InvokeSpinCompleted()
     {
-        OnSpinCompleted?.Invoke();
+        onSpinCompleted?.Invoke();
     }
 
 
