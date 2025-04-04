@@ -1,19 +1,18 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections;
 
+/// <summary>
+/// This class is the base class for all bet buttons.
+/// It handles the color transition and the click event.
+/// It also contains the logic for calculating the payout. //TODO: think is this the best place for this? 
+/// </summary>
 [RequireComponent(typeof(BoxCollider))]
 public abstract class BetButton : MonoBehaviour, IBetButton
 {
-    [SerializeField] protected Color normalColor = new Color(0.8f, 0.8f, 0.8f, 0f);
-    [SerializeField] protected Color hoverColor = new Color(0.8f, 0.8f, 0.2f, 0.5f);
-    [SerializeField] protected Color winningColor = new Color(0f, 0.8f, 0f, 0.7f);
-    [SerializeField] protected float colorTransitionSpeed = 5f;
-    
+    [SerializeField] protected TableColorSettings tableColorSettings;
     protected bool isHighlighted = false;
     protected bool isWinning = false;
     protected Material quadMaterial;
- 
     protected MeshRenderer quadRenderer;
     protected Color targetColor;
     protected Coroutine colorChangeCoroutine;
@@ -24,8 +23,8 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         quadMaterial = new Material(quadRenderer.sharedMaterial);
         quadRenderer.material = quadMaterial;
         
-        targetColor = normalColor;
-        SetQuadColor(normalColor);
+        targetColor = tableColorSettings.normalColor;
+        SetQuadColor(tableColorSettings.normalColor);
     }
     
     protected void SetQuadColor(Color color)
@@ -55,7 +54,7 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         
         while (t < 1)
         {
-            t += Time.deltaTime * colorTransitionSpeed;
+            t += Time.deltaTime * tableColorSettings.colorTransitionSpeed;
             quadRenderer.material.color = Color.Lerp(currentColor, targetColor, t);
             yield return null;
         }
@@ -72,18 +71,17 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         }
     }
     
-    private void OnMouseUp()
+    //TODO: which event should we use? onMouseDown or onMouseUp?
+    private void OnMouseDown()
     {
-        Debug.Log("OnMouseUp");
         OnClick();
     }
     
     private void OnMouseEnter()
     {
-        Debug.Log("OnMouseEnter");
         if (!isHighlighted && !isWinning)
         {
-            TransitionToColor(hoverColor);
+            TransitionToColor(tableColorSettings.hoverColor);
         }
     }
     
@@ -91,24 +89,27 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     {
         if (!isHighlighted && !isWinning)
         {
-            TransitionToColor(normalColor);
+            TransitionToColor(tableColorSettings.normalColor);
         }
     }
     
+    // Add bet to the necessary place
     public virtual void OnClick()
     {
+        //TODO: implement this
     }
     
+    // Method to show the winning status of the bet
     public virtual void ShowWinningStatus(bool isWinning)
     {
         this.isWinning = isWinning;
         if (isWinning)
         {
-            TransitionToColor(winningColor);
+            TransitionToColor(tableColorSettings.winningColor);
         }
         else
         {
-            TransitionToColor(normalColor);
+            TransitionToColor(tableColorSettings.normalColor);
         }
     }
     
@@ -116,6 +117,11 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     
     public abstract int GetCoveredNumbersCount();
     
+    /// <summary>
+    /// Calculate the payout for the bet
+    /// It uses the formula (36 - coveredNumbers) / coveredNumbers
+    /// </summary>
+    /// <returns>The payout for the bet</returns>
     public virtual float GetPayout()
     {
         int coveredNumbers = GetCoveredNumbersCount();
@@ -127,13 +133,13 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     
     public abstract bool IsWinner(int winningNumber);
     
+    /// <summary>
+    /// Calculate the payout for the bet
+    /// </summary>
+    /// <param name="betAmount">The amount of the bet</param>
+    /// <returns>The payout for the bet</returns>
     public virtual float CalculatePayout(float betAmount)
     {
         return betAmount * GetPayout();
-    }
-    
-    protected static int CalculatePaymentMultiplier(int coveredNumbers)
-    {
-        return (36 - coveredNumbers) / coveredNumbers;
     }
 }

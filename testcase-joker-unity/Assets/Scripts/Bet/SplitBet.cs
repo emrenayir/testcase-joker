@@ -2,7 +2,15 @@ using UnityEngine;
 
 public class SplitBet : BetButton
 {
-    [SerializeField] private int[] numbers = new int[2];
+    [SerializeField] private int firstNumber;
+    private int[] numbers = new int[2];
+    
+    protected override void Awake()
+    {
+        base.Awake();
+        numbers[0] = firstNumber;
+        numbers[1] = firstNumber + 3;
+    }
     
     public override BetType GetBetType()
     {

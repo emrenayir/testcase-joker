@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3003040237693941510}
   - component: {fileID: 670814953543370739}
   m_Layer: 0
-  m_Name: BetPoint
+  m_Name: BetPointBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

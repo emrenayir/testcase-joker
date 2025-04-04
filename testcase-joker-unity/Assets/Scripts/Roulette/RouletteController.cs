@@ -24,7 +24,7 @@ public class RouletteController : MonoBehaviour
         };
     }
 
-    void OnDestroy()
+    void OnDisable()
     {
         onSpinCompleted = null;
     }
