@@ -188,7 +188,6 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
             bezierPos.y += bounceAmount;
             bezierPos = KeepWithinWheelBounds(bezierPos, bounceAmount);
 
-            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, t * t);
             transform.position = bezierPos;
 
             yield return null;

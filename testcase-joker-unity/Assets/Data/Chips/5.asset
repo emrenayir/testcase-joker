@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97fd48116099c4c4f965bfbfb937fe0d, type: 3}
-  m_Name: TableColorSettings
+  m_Script: {fileID: 11500000, guid: a49d855736bfb47fe961f7fa43c63a1f, type: 3}
+  m_Name: 5
   m_EditorClassIdentifier: 
-  normalColor: {r: 1, g: 1, b: 1, a: 0}
-  hoverColor: {r: 1, g: 1, b: 0.740566, a: 0.5}
-  winningColor: {r: 0, g: 0.8, b: 0, a: 0.7}
-  colorTransitionSpeed: 5
+  value: 5
+  chipPrefab: {fileID: 127184, guid: 86d7999b01cbb044f834ce92403c4c7c, type: 3}
