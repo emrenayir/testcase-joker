@@ -7,10 +7,9 @@ public class ColumnBet : BetButton
     
     private HashSet<int> columnNumbers = new HashSet<int>();
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
-        
+        base.Start();
         // Populate the column numbers
         for (int i = 0; i < 12; i++)
         {

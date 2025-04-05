@@ -25,8 +25,8 @@ public class HighLowBet : BetButton
         return isHigh == numberIsHigh;
     }
     
-    public override float CalculatePayout(float betAmount)
+    public override int CalculatePayout(int betAmount)
     {
-        return betAmount * GetPayout();
+        return (int)(betAmount * GetPayout());
     }
 } 

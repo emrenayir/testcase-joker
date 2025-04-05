@@ -6,9 +6,9 @@ public class StreetBet : BetButton
     
     private int[] numbers = new int[3];
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         numbers[0] = startNumber;
         numbers[1] = startNumber + 1;
         numbers[2] = startNumber + 2;

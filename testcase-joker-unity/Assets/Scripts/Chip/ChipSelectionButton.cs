@@ -10,7 +10,7 @@ using static ChipHelper;
 /// Connected to ChipSelectionController.
 /// </summary>
 [RequireComponent(typeof(BoxCollider))]
-public class ChipButton : MonoBehaviour
+public class ChipSelectionButton : MonoBehaviour
 {
     /// <summary>
     /// The value of the chip button.

@@ -16,7 +16,7 @@ PrefabInstance:
     - target: {fileID: 1062391918397767687, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint Variant
+      value: BetPointColumn
       objectReference: {fileID: 0}
     - target: {fileID: 3003040237693941510, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
         type: 3}
@@ -91,5 +91,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1062391918397767687, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2499231736295635520}
   m_SourcePrefab: {fileID: 100100000, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab, type: 3}
+--- !u!1 &4441692509274771688 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1062391918397767687, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
+    type: 3}
+  m_PrefabInstance: {fileID: 3682343743505977583}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2499231736295635520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4441692509274771688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41d6b07cfd0cb467d92d0208a616aeca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tableColorSettings: {fileID: 11400000, guid: 46c23ffeb2aa04dd19850da2f7a3f407, type: 2}
+  columnIndex: 2

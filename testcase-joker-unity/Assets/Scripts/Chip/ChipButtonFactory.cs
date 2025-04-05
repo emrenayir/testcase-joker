@@ -51,7 +51,7 @@ public class ChipButtonFactory : MonoBehaviour
         chip.transform.localPosition = Vector3.zero;
 
         // Initialize the chip button component
-        ChipButton chipButtonComponent = chipButton.GetComponent<ChipButton>();
+        ChipSelectionButton chipButtonComponent = chipButton.GetComponent<ChipSelectionButton>();
         chipButtonComponent.Initialize(value, chipSelectionController, chip);
         
         return chipButton;

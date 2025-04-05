@@ -8,9 +8,9 @@ public class DozenBet : BetButton
     private int minNumber;
     private int maxNumber;
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         
         // Set the range for this dozen
         minNumber = (dozenIndex * 12) + 1;

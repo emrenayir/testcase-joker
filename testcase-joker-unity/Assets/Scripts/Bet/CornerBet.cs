@@ -6,9 +6,9 @@ public class CornerBet : BetButton
     
     private int[] numbers = new int[4];
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         // For a corner bet, we need to handle the 4 adjacent numbers
         numbers[0] = startNumber;
         numbers[1] = startNumber + 1;

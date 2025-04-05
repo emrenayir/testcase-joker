@@ -5,9 +5,9 @@ public class SplitBet : BetButton
     [SerializeField] private int firstNumber;
     private int[] numbers = new int[2];
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         numbers[0] = firstNumber;
         numbers[1] = firstNumber + 3;
     }

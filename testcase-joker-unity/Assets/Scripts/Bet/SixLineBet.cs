@@ -6,9 +6,9 @@ public class SixLineBet : BetButton
     
     private int[] numbers = new int[6];
     
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         // Six line bet covers two adjacent rows of numbers
         numbers[0] = startNumber;
         numbers[1] = startNumber + 1;

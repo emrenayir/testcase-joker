@@ -25,8 +25,8 @@ public class EvenOddBet : BetButton
         return isEven == numberIsEven;
     }
     
-    public override float CalculatePayout(float betAmount)
+    public override int CalculatePayout(int betAmount)
     {
-        return betAmount * GetPayout();
+        return (int)(betAmount * GetPayout());
     }
 } 

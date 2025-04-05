@@ -13,7 +13,7 @@ public class ChipSelectionController : MonoBehaviour
     public event Action<ChipValue> OnChipSelected;
 
     /// <summary>
-    /// The currently selected chip value.
+    /// Currently selected chip value.
     /// </summary>
     public ChipValue SelectedChipValue 
     { 
@@ -44,7 +44,7 @@ public class ChipSelectionController : MonoBehaviour
     /// Called when a chip button is clicked.
     /// </summary>
     /// <param name="button">The button that was clicked.</param>
-    public void ChipButtonClick(ChipButton button)
+    public void ChipButtonClick(ChipSelectionButton button)
     {
         SelectedChipValue = button.Value;
         Debug.Log("Chip button clicked: " + SelectedChipValue);
