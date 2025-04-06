@@ -1,6 +1,11 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// This class is responsible for managing the user's money.
+/// It is responsible for adding and subtracting money from the user's money.
+/// It is also responsible for updating the UI when the money changes.
+/// </summary>
 public class UserMoney : MonoBehaviour
 {
     [SerializeField] private int userMoney = 1000;
@@ -73,15 +78,14 @@ public class UserMoney : MonoBehaviour
     
     public void RemoveChip(int chipValue)
     {
-        // Remove chip from table
         SubtractBet(chipValue);
         AddMoney(chipValue);
     }
     
-    public void ProcessPayment(int payment)
+    public void ProcessPayment(int payment, int lostBets)
     {
-        currentPayment = payment;
-        OnPaymentChanged?.Invoke(payment);
+        currentPayment = payment + (currentBet - lostBets);
+        OnPaymentChanged?.Invoke(currentPayment);
         
         // Reset current bet
         currentBet = 0;
@@ -90,8 +94,10 @@ public class UserMoney : MonoBehaviour
         // Add winnings if any
         if (payment > 0)
         {
-            AddMoney(payment);
+            AddMoney(currentPayment);
         }
+
+        currentPayment = 0;
         
         Debug.Log($"Player money updated with payment: {payment}!");
     }

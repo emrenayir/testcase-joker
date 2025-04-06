@@ -2,6 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static ChipHelper;
 
+/// <summary>
+/// This is a singleton class that manages the pool of chips.
+/// It is responsible for instantiating, pooling, and returning chips.
+/// Handles multiple chip types.
+/// </summary>
 public class ChipPool : MonoBehaviour
 {
     public static ChipPool Instance;

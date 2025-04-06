@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// Column bet
+/// </summary>
 public class ColumnBet : BetButton
 {
     [SerializeField] private int columnIndex; // 0, 1, or 2 for the three columns

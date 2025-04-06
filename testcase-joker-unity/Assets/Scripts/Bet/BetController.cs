@@ -8,63 +8,41 @@ using UnityEngine;
 /// </summary>
 public class BetController : MonoBehaviour
 {
-    [SerializeField] private List<BetButton> betButtons;
-    [SerializeField] private ChipSelectionController chipSelectionController;
+    public event Action OnBetRemoved;
+    public event Action<BetButton> OnBetPlaced;
+    public bool IsBettingEnabled = true;
 
+    [SerializeField] private ChipSelectionController chipSelectionController;
     [SerializeField] private UserMoney userMoney;
+    [SerializeField] private List<BetButton> betButtons;
+
     private List<BetButton> activeBets = new List<BetButton>();
 
-     public event Action OnBetRemoved;
-
-    /// <summary>
-    /// Add bet to the necessary place
-    /// </summary>
-    /// <param name="betButton">The bet button that was clicked</param>
-    /// 
 
     void Awake()
     {
-        foreach (var betButton in betButtons)
-        {
-            betButton.OnBetPlaced += OnBetPlaced;
-            betButton.SetBetButton(chipSelectionController, this);
-        }
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ClearAllBets();
-            OnBetRemoved?.Invoke();
-        }
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            ProcessResult(1);
-        }
-    }
-    void OnDisable()
-    {
-        if (betButtons == null) return;
+        OnBetPlaced += HandleBet;
 
         foreach (var betButton in betButtons)
         {
-            if (betButton != null)
-            {
-                betButton.OnBetPlaced -= OnBetPlaced;
-            }
+            betButton.SetBetButton(chipSelectionController, this, userMoney);
         }
     }
 
-    public void OnBetPlaced(BetButton betButton)
-    {
 
-        userMoney.PlaceBet(betButton.TotalChipValue);
+    public void InvokePlaceBet(BetButton betButton)
+    {
+        OnBetPlaced?.Invoke(betButton);
+    }
+
+    private void HandleBet(BetButton betButton)
+    {
+        userMoney.PlaceBet(ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue));
+
 
         //Check if the bet is already in the list
         if (activeBets.Contains(betButton))
         {
-            Debug.Log($"Bet {betButton.GetBetType()} $ {betButton.gameObject.name} is already in the list");
             return;
         }
         activeBets.Add(betButton);
@@ -77,21 +55,29 @@ public class BetController : MonoBehaviour
     public void ProcessResult(int winningNumber)
     {
         int totalWinnings = 0;
+        int lostBets = 0;
 
         foreach (var bet in activeBets)
         {
-            Debug.Log($"Bet {bet.GetBetType()} $ {bet.gameObject.name}");
+            //Check if the bet is a winner
             bool isWinner = bet.IsWinner(winningNumber);
+
+            //Indicate the winning status of the bet
             bet.ShowWinningStatus(isWinner);
 
+            //Calculate the payout
             if (isWinner)
             {
                 Debug.Log($"Bet {bet.GetBetType()} $ {bet.gameObject.name} is a winner. Total chip value: {bet.TotalChipValue}");
                 totalWinnings += bet.CalculatePayout(bet.TotalChipValue);
             }
+            else
+            {
+                lostBets += bet.TotalChipValue;
+            }
         }
 
-        userMoney.ProcessPayment(totalWinnings);
+        userMoney.ProcessPayment(totalWinnings, lostBets);
 
         Debug.Log($"Winning number: {winningNumber}. Total winnings: {totalWinnings}");
     }
@@ -103,5 +89,6 @@ public class BetController : MonoBehaviour
     public void ClearAllBets()
     {
         activeBets.Clear();
+        OnBetRemoved?.Invoke();
     }
 }

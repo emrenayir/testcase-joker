@@ -32,7 +32,7 @@ public class ChipSelectionController : MonoBehaviour
     {
         chipButtonFactory = GetComponent<ChipButtonFactory>();
         // Set default value
-        selectedChipValue = ChipValue.One;
+        SelectedChipValue = ChipValue.One;
     }
 
     void Start()

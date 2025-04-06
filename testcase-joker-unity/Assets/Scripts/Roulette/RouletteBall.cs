@@ -218,13 +218,10 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
             }
 
             transform.position = position;
-            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, t);
 
             yield return null;
         }
 
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
         transform.position = targetPosition;
         rb.isKinematic = true;
     }
