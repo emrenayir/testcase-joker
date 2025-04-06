@@ -84,7 +84,6 @@ public class BetController : MonoBehaviour
 
     /// <summary>
     /// Clear all bets
-    /// Chip vallue will be added later 
     /// </summary>
     public void ClearAllBets()
     {

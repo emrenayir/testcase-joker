@@ -47,7 +47,6 @@ public class ChipSelectionController : MonoBehaviour
     public void ChipButtonClick(ChipSelectionButton button)
     {
         SelectedChipValue = button.Value;
-        Debug.Log("Chip button clicked: " + SelectedChipValue);
     }
 }
 

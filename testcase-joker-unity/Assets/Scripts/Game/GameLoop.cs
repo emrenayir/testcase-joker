@@ -12,7 +12,7 @@ public class GameLoop : MonoBehaviour
     [SerializeField] private RouletteController rouletteController;
     [SerializeField] private BetController betController;
     [SerializeField] private UserMoney userMoney;
-    [SerializeField] private Button confirmButton;  //TODO: This should be in UI Manager
+    [SerializeField] private UIManager uiManager;
 
     private enum GamePhase
     {
@@ -25,25 +25,20 @@ public class GameLoop : MonoBehaviour
 
     void Start()
     {
+        if (uiManager != null)
+        {
+            uiManager.OnConfirmButtonClicked += OnBetPlacementConfirmed;
+            uiManager.OnResetBetButtonClicked += OnResetBetButtonClicked;
+        }
+        
         StartGame();
     }
 
-    void OnEnable()
-    {
-        // Subscribe to confirm button
-        if (confirmButton != null)
-        {
-            confirmButton.onClick.AddListener(OnBetPlacementConfirmed);
-        }
-    }
 
-    void OnDisable()
+    void OnDestroy()
     {
-        // Unsubscribe from events
-        if (confirmButton != null)
-        {
-            confirmButton.onClick.RemoveListener(OnBetPlacementConfirmed);
-        }
+        if (uiManager != null)
+            uiManager.OnConfirmButtonClicked -= OnBetPlacementConfirmed;
     }
 
     public void StartGame()
@@ -75,9 +70,9 @@ public class GameLoop : MonoBehaviour
         Debug.Log("Entering Chip Selection Phase");
         // Enable chip selection and betting
         // Enable confirm button
-        if (confirmButton != null)
+        if (uiManager != null)
         {
-            confirmButton.gameObject.SetActive(true);
+            uiManager.SetConfirmButtonActive(true);
         }
         
         // Clear previous bets
@@ -90,9 +85,9 @@ public class GameLoop : MonoBehaviour
         Debug.Log("Entering Roulette Spinning Phase");
         // Disable chip selection and betting
         betController.IsBettingEnabled = false;
-        if (confirmButton != null)
+        if (uiManager != null)
         {
-            confirmButton.gameObject.SetActive(false);
+            uiManager.SetConfirmButtonActive(false);
         }
         
         // Start the roulette spinning and listen for completion
@@ -138,5 +133,10 @@ public class GameLoop : MonoBehaviour
     {
         // Player has confirmed their chip selection, move to next phase
         SetPhase(GamePhase.RouletteSpinning);
+    }
+
+    private void OnResetBetButtonClicked()
+    {
+        betController.ClearAllBets();
     }
 }
