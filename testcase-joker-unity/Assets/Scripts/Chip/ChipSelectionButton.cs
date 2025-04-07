@@ -21,6 +21,8 @@ public class ChipSelectionButton : MonoBehaviour
     [SerializeField] private float riseHeight = 0.3f;
     [SerializeField] private float flipDuration = 0.5f;
 
+    [SerializeField] private GameObject selectionIndicator;
+
     private bool isAnimating = false;
     private ChipSelectionController chipSelectionController;
     private GameObject chipModel;
@@ -103,6 +105,12 @@ public class ChipSelectionButton : MonoBehaviour
     private float EaseInOutQuad(float t)
     {
         return t < 0.5f ? 2 * t * t : 1 - Mathf.Pow(-2 * t + 2, 2) / 2;
+    }
+
+
+    public void SetSelected(bool selected)
+    {
+        selectionIndicator.SetActive(selected);
     }
 }
 

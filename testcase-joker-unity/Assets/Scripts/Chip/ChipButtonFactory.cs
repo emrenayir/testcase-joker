@@ -21,14 +21,18 @@ public class ChipButtonFactory : MonoBehaviour
     /// and places them at the specified locations.
     /// </summary>
     /// <param name="chipSelectionController">The controller that manages chip selection.</param>
-    public void CreateChipButtons(ChipSelectionController chipSelectionController)
+    public List<ChipSelectionButton> CreateChipButtons(ChipSelectionController chipSelectionController)
     {
         ChipValue[] chipValues = (ChipValue[])System.Enum.GetValues(typeof(ChipValue));
+        List<ChipSelectionButton> chipButtons = new List<ChipSelectionButton>();
         for (int i = 0; i < chipButtonLocations.Count && i < chipValues.Length; i++)
         {
             GameObject chipButton = CreateChipButton(chipValues[i], chipSelectionController);
             PlaceChipButton(chipButton, chipButtonLocations[i]);
+            chipButtons.Add(chipButton.GetComponent<ChipSelectionButton>());
         }
+
+        return chipButtons;
     }
 
     /// <summary>
