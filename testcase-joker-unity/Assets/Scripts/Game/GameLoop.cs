@@ -56,8 +56,6 @@ public class GameLoop : MonoBehaviour
                 totalSpins = stats.TotalSpins;
                 totalWins = stats.TotalWins;
                 totalProfit = stats.TotalProfit;
-                
-                Debug.Log($"GameLoop loaded stats: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
             }
         }
         
@@ -108,7 +106,6 @@ public class GameLoop : MonoBehaviour
 
     private void EnterChipSelectionPhase()
     {
-        Debug.Log("Entering Chip Selection Phase");
         // Enable chip selection and betting
         // Enable confirm button
         if (uiManager != null)
@@ -216,7 +213,6 @@ public class GameLoop : MonoBehaviour
     private void OnBetPlacementConfirmed()
     {
         // Player has confirmed their chip selection, move to next phase
-        Debug.Log("OnBetPlacementConfirmed");
         SetPhase(GamePhase.RouletteSpinning);
     }
 

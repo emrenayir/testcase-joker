@@ -16,6 +16,7 @@ public class PlayerSave : MonoBehaviour
     {
         saveFilePath = Path.Combine(Application.persistentDataPath, "player_data.json");
         statsFilePath = Path.Combine(Application.persistentDataPath, "player_stats.json");
+        Debug.Log($"Save file path: {saveFilePath}");
     }
 
     /// <summary>
@@ -76,8 +77,6 @@ public class PlayerSave : MonoBehaviour
 
         string jsonData = JsonUtility.ToJson(saveData, true);
         File.WriteAllText(saveFilePath, jsonData);
-
-        Debug.Log($"Saved {saveData.Bets.Count} bets and player money data to {saveFilePath}");
     }
     
 
@@ -90,7 +89,6 @@ public class PlayerSave : MonoBehaviour
         if (File.Exists(saveFilePath))
         {
             File.Delete(saveFilePath);
-            Debug.Log("Deleted saved game data");
         }
     }
 
@@ -122,18 +120,15 @@ public class PlayerSave : MonoBehaviour
             if (saveData.PlayerMoney > 0)
             {
                 userMoney.SetMoney(saveData.PlayerMoney);
-                Debug.Log($"Loaded player money: {saveData.PlayerMoney}");
             }
             
             if (saveData.CurrentBet > 0)
             {
                 userMoney.SetCurrentBet(saveData.CurrentBet);
-                Debug.Log($"Loaded current bet: {saveData.CurrentBet}");
             }
             
             // Load last round earnings
             userMoney.SetCurrentPayment(saveData.LastRoundEarnings);
-            Debug.Log($"Loaded last round earnings: {saveData.LastRoundEarnings}");
         }
 
         // Load bets data
@@ -156,8 +151,6 @@ public class PlayerSave : MonoBehaviour
                     loadedBetsCount++;
                 }
             }
-
-            Debug.Log($"Loaded {loadedBetsCount} bets from {saveFilePath}");
         }
         
         // Return stats data
@@ -168,7 +161,7 @@ public class PlayerSave : MonoBehaviour
             TotalProfit = saveData.TotalProfit
         };
         
-        Debug.Log($"Loaded player stats from save file: Spins: {statsData.TotalSpins}, Wins: {statsData.TotalWins}, Profit: {statsData.TotalProfit}");
+        
         
         return statsData;
     }
@@ -201,8 +194,6 @@ public class PlayerSave : MonoBehaviour
         // Save back to file
         string updatedJsonData = JsonUtility.ToJson(saveData, true);
         File.WriteAllText(saveFilePath, updatedJsonData);
-        
-        Debug.Log($"Saved player money data: {saveData.PlayerMoney}");
     }
     
     /// <summary>
@@ -237,8 +228,6 @@ public class PlayerSave : MonoBehaviour
                 File.WriteAllText(saveFilePath, updatedJson);
             }
         }
-        
-        Debug.Log($"Saved player stats: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
     }
     
     /// <summary>
@@ -249,17 +238,11 @@ public class PlayerSave : MonoBehaviour
     {
         if (!File.Exists(statsFilePath))
         {
-            Debug.Log("No player stats found");
             return null;
         }
         
         string jsonData = File.ReadAllText(statsFilePath);
         PlayerStatsData statsData = JsonUtility.FromJson<PlayerStatsData>(jsonData);
-        
-        if (statsData != null)
-        {
-            Debug.Log($"Loaded player stats: Spins: {statsData.TotalSpins}, Wins: {statsData.TotalWins}, Profit: {statsData.TotalProfit}");
-        }
         
         return statsData;
     }
@@ -273,7 +256,6 @@ public class PlayerSave : MonoBehaviour
         if (File.Exists(statsFilePath))
         {
             File.Delete(statsFilePath);
-            Debug.Log("Deleted player stats data");
         }
     }
 }
