@@ -13,6 +13,13 @@ public class GameLoop : MonoBehaviour
     [SerializeField] private BetController betController;
     [SerializeField] private UserMoney userMoney;
     [SerializeField] private UIManager uiManager;
+    [SerializeField] private PlayerSave playerSave;
+
+    // Win/Loss tracking
+    private int totalSpins = 0;
+    private int totalWins = 0;
+    private int totalProfit = 0;
+    private int currentRoundProfit = 0;
 
     private enum GamePhase
     {
@@ -31,9 +38,43 @@ public class GameLoop : MonoBehaviour
             uiManager.OnResetBetButtonClicked += OnResetBetButtonClicked;
         }
         
+        // Load stats
+        if (playerSave != null)
+        {
+            // First try loading from the dedicated stats file
+            var stats = playerSave.LoadPlayerStats();
+            
+            // If that doesn't exist, we might have stats in the main save file
+            if (stats == null && betController != null)
+            {
+                stats = playerSave.LoadBets(betController);
+            }
+            
+            // Apply the loaded stats if available
+            if (stats != null)
+            {
+                totalSpins = stats.TotalSpins;
+                totalWins = stats.TotalWins;
+                totalProfit = stats.TotalProfit;
+                
+                Debug.Log($"GameLoop loaded stats: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
+            }
+        }
+        
+        // Update UI with initial stats
+        UpdateStatsUI();
+        
         StartGame();
     }
 
+    // Helper method to update stats UI
+    private void UpdateStatsUI()
+    {
+        if (uiManager != null)
+        {
+            uiManager.UpdateStatsDisplay(totalSpins, totalWins, totalProfit);
+        }
+    }
 
     void OnDestroy()
     {
@@ -88,6 +129,12 @@ public class GameLoop : MonoBehaviour
             uiManager.SetConfirmButtonActive(false);
         }
         
+        // Track the current bet amount for profit/loss calculation
+        currentRoundProfit = -userMoney.GetCurrentBet();
+        
+        // Increment total spins
+        totalSpins++;
+        
         // Start the roulette spinning and listen for completion
         rouletteController.StartRoulette();
         
@@ -115,9 +162,38 @@ public class GameLoop : MonoBehaviour
 
     private IEnumerator ProcessResults()
     {
+        // Store initial money for win/loss calculation
+        int initialMoney = userMoney.GetCurrentMoney();
         
         // Process the bet based on the winning number
         betController.ProcessResult(rouletteController.GetResult());
+        
+        // Calculate profit/loss for this round
+        int finalMoney = userMoney.GetCurrentMoney();
+        int winnings = finalMoney - initialMoney;
+        currentRoundProfit += winnings;
+        
+        // Update stats
+        totalProfit += currentRoundProfit;
+        
+        // Check if player won this round
+        if (currentRoundProfit > 0)
+        {
+            totalWins++;
+        }
+        
+        // Update UI
+        UpdateStatsUI();
+        
+        // Save stats
+        if (playerSave != null)
+        {
+            playerSave.SavePlayerStats(totalSpins, totalWins, totalProfit);
+        }
+        
+        // Log stats
+        Debug.Log($"Round result: {(currentRoundProfit > 0 ? "Win" : "Loss")} | Profit: {currentRoundProfit} | " +
+                 $"Total: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
         
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
@@ -133,6 +209,7 @@ public class GameLoop : MonoBehaviour
     private void OnBetPlacementConfirmed()
     {
         // Player has confirmed their chip selection, move to next phase
+        Debug.Log("OnBetPlacementConfirmed");
         SetPhase(GamePhase.RouletteSpinning);
     }
 
@@ -140,4 +217,9 @@ public class GameLoop : MonoBehaviour
     {
         betController.ClearAllBets();
     }
+    
+    // Getters for stat values
+    public int GetTotalSpins() => totalSpins;
+    public int GetTotalWins() => totalWins;
+    public int GetTotalProfit() => totalProfit;
 }

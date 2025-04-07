@@ -9,11 +9,13 @@ using UnityEngine;
 public class PlayerSave : MonoBehaviour
 {
     private string saveFilePath;
+    private string statsFilePath;
     [SerializeField] private UserMoney userMoney;
 
     private void Awake()
     {
         saveFilePath = Path.Combine(Application.persistentDataPath, "player_data.json");
+        statsFilePath = Path.Combine(Application.persistentDataPath, "player_stats.json");
     }
 
     /// <summary>
@@ -23,6 +25,29 @@ public class PlayerSave : MonoBehaviour
     public void SaveBets(List<BetButton> activeBets)
     {
         PlayerSaveData saveData = new PlayerSaveData();
+        
+        // If we have an existing save file, try to load stats from it first
+        if (File.Exists(saveFilePath))
+        {
+            string existingJson = File.ReadAllText(saveFilePath);
+            PlayerSaveData existingData = JsonUtility.FromJson<PlayerSaveData>(existingJson);
+            if (existingData != null)
+            {
+                // Preserve stats data
+                saveData.TotalSpins = existingData.TotalSpins;
+                saveData.TotalWins = existingData.TotalWins;
+                saveData.TotalProfit = existingData.TotalProfit;
+            }
+        }
+        
+        // Load latest stats data if available
+        PlayerStatsData statsData = LoadPlayerStats();
+        if (statsData != null)
+        {
+            saveData.TotalSpins = statsData.TotalSpins;
+            saveData.TotalWins = statsData.TotalWins;
+            saveData.TotalProfit = statsData.TotalProfit;
+        }
         
         // Save bets data
         if (activeBets != null && activeBets.Count > 0)
@@ -72,12 +97,13 @@ public class PlayerSave : MonoBehaviour
     /// Load saved bets from JSON and restore them to the game
     /// </summary>
     /// <param name="betController">Reference to the bet controller</param>
-    public void LoadBets(BetController betController)
+    /// <returns>PlayerStatsData object containing stored stats, or null if no data</returns>
+    public PlayerStatsData LoadBets(BetController betController)
     {
         if (!File.Exists(saveFilePath))
         {
             Debug.Log("No saved data found");
-            return;
+            return null;
         }
 
         string jsonData = File.ReadAllText(saveFilePath);
@@ -86,7 +112,7 @@ public class PlayerSave : MonoBehaviour
         if (saveData == null)
         {
             Debug.Log("No valid save data found");
-            return;
+            return null;
         }
         
         // Load player money data
@@ -109,24 +135,37 @@ public class PlayerSave : MonoBehaviour
         if (saveData.Bets == null || saveData.Bets.Count == 0)
         {
             Debug.Log("No bet data found in save file");
-            return;
         }
-
-        List<BetButton> betButtons = betController.GetBetButtons();
-
-        int loadedBetsCount = 0;
-        foreach (var betData in saveData.Bets)
+        else
         {
-            // Find the bet button by name
-            BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
-            if (betButton != null)
-            {
-                betButton.LoadBetData(betData);
-                loadedBetsCount++;
-            }
-        }
+            List<BetButton> betButtons = betController.GetBetButtons();
 
-        Debug.Log($"Loaded {loadedBetsCount} bets from {saveFilePath}");
+            int loadedBetsCount = 0;
+            foreach (var betData in saveData.Bets)
+            {
+                // Find the bet button by name
+                BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
+                if (betButton != null)
+                {
+                    betButton.LoadBetData(betData);
+                    loadedBetsCount++;
+                }
+            }
+
+            Debug.Log($"Loaded {loadedBetsCount} bets from {saveFilePath}");
+        }
+        
+        // Return stats data
+        PlayerStatsData statsData = new PlayerStatsData
+        {
+            TotalSpins = saveData.TotalSpins,
+            TotalWins = saveData.TotalWins,
+            TotalProfit = saveData.TotalProfit
+        };
+        
+        Debug.Log($"Loaded player stats from save file: Spins: {statsData.TotalSpins}, Wins: {statsData.TotalWins}, Profit: {statsData.TotalProfit}");
+        
+        return statsData;
     }
     
     /// <summary>
@@ -159,6 +198,78 @@ public class PlayerSave : MonoBehaviour
         
         Debug.Log($"Saved player money data: {saveData.PlayerMoney}");
     }
+    
+    /// <summary>
+    /// Save player stats (wins, losses, etc)
+    /// </summary>
+    public void SavePlayerStats(int totalSpins, int totalWins, int totalProfit)
+    {
+        // Save to dedicated stats file
+        PlayerStatsData statsData = new PlayerStatsData
+        {
+            TotalSpins = totalSpins,
+            TotalWins = totalWins,
+            TotalProfit = totalProfit
+        };
+        
+        string jsonData = JsonUtility.ToJson(statsData, true);
+        File.WriteAllText(statsFilePath, jsonData);
+        
+        // Also update the main save file if it exists
+        if (File.Exists(saveFilePath))
+        {
+            string existingJson = File.ReadAllText(saveFilePath);
+            PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(existingJson);
+            
+            if (saveData != null)
+            {
+                saveData.TotalSpins = totalSpins;
+                saveData.TotalWins = totalWins;
+                saveData.TotalProfit = totalProfit;
+                
+                string updatedJson = JsonUtility.ToJson(saveData, true);
+                File.WriteAllText(saveFilePath, updatedJson);
+            }
+        }
+        
+        Debug.Log($"Saved player stats: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
+    }
+    
+    /// <summary>
+    /// Load player stats
+    /// </summary>
+    /// <returns>PlayerStatsData object or null if no data exists</returns>
+    public PlayerStatsData LoadPlayerStats()
+    {
+        if (!File.Exists(statsFilePath))
+        {
+            Debug.Log("No player stats found");
+            return null;
+        }
+        
+        string jsonData = File.ReadAllText(statsFilePath);
+        PlayerStatsData statsData = JsonUtility.FromJson<PlayerStatsData>(jsonData);
+        
+        if (statsData != null)
+        {
+            Debug.Log($"Loaded player stats: Spins: {statsData.TotalSpins}, Wins: {statsData.TotalWins}, Profit: {statsData.TotalProfit}");
+        }
+        
+        return statsData;
+    }
+    
+    [ContextMenu("ClearPlayerStats")]
+    /// <summary>
+    /// Clear player stats by deleting the stats file
+    /// </summary>
+    public void ClearPlayerStats()
+    {
+        if (File.Exists(statsFilePath))
+        {
+            File.Delete(statsFilePath);
+            Debug.Log("Deleted player stats data");
+        }
+    }
 }
 
 [Serializable]
@@ -167,6 +278,11 @@ public class PlayerSaveData
     public List<BetData> Bets = new List<BetData>();
     public int PlayerMoney = 1000; // Default starting money
     public int CurrentBet = 0;
+    
+    // Stats data
+    public int TotalSpins = 0;
+    public int TotalWins = 0;
+    public int TotalProfit = 0;
 }
 
 [Serializable]
@@ -183,4 +299,12 @@ public class ChipData
 {
     public int ChipValue;
     public float PositionY;
+} 
+
+[Serializable]
+public class PlayerStatsData
+{
+    public int TotalSpins = 0;
+    public int TotalWins = 0;
+    public int TotalProfit = 0;
 } 

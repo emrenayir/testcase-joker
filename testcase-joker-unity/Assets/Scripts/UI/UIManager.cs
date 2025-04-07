@@ -16,6 +16,13 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI betAmountText;
     [SerializeField] private TextMeshProUGUI userMoneyText;
+
+
+    [SerializeField] private TextMeshProUGUI totalSpinsText;
+    [SerializeField] private TextMeshProUGUI totalWinsText;
+    [SerializeField] private TextMeshProUGUI totalProfitText;
+
+    // Stats UI elements
     
     // Define events to communicate with other systems
     public event Action OnConfirmButtonClicked;
@@ -68,6 +75,7 @@ public class UIManager : MonoBehaviour
     public void OnBetPlacementConfirmed()
     {
         // Invoke the event for anyone listening
+        Debug.Log("OnBetPlacementConfirmed");
         OnConfirmButtonClicked?.Invoke();
     }
     
@@ -98,5 +106,15 @@ public class UIManager : MonoBehaviour
     {
         if (resetBetButton != null)
             resetBetButton.gameObject.SetActive(isActive);
+    }
+
+    /// <summary>
+    /// Update the stats display with the current win/loss tracking information
+    /// </summary>
+    public void UpdateStatsDisplay(int totalSpins, int totalWins, int totalProfit)
+    {
+        totalSpinsText.text = totalSpins.ToString();
+        totalWinsText.text = totalWins.ToString();
+        totalProfitText.text = totalProfit.ToString();
     }
 }
