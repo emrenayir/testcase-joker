@@ -11,11 +11,13 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private UserMoney userMoney;
     [SerializeField] private Button confirmButton;
+    [SerializeField] private Button addFreeChipsButton;
 
     //[SerializeField] private Button undoBetButton; //TODO: implement this
     [SerializeField] private Button resetBetButton;
 
     [SerializeField] private TextMeshProUGUI betAmountText;
+    [SerializeField] private TextMeshProUGUI lastRoundEarningsText;
     [SerializeField] private TextMeshProUGUI userMoneyText;
 
 
@@ -41,11 +43,25 @@ public class UIManager : MonoBehaviour
         if (resetBetButton != null)
             resetBetButton.onClick.AddListener(OnResetBetClicked);
 
+        if (addFreeChipsButton != null)
+            addFreeChipsButton.onClick.AddListener(OnAddFreeChipsClicked);
+
         if (userMoney != null)
         {
             userMoney.OnMoneyChanged += OnUserMoneyChanged;
             userMoney.OnBetChanged += OnBetAmountChanged;
+            userMoney.OnPaymentChanged += OnLastRoundEarningsChanged;
         }
+    }
+
+    private void OnLastRoundEarningsChanged(int value)
+    {
+        lastRoundEarningsText.text = value.ToString();
+    }
+
+    private void OnAddFreeChipsClicked()
+    {
+        userMoney.AddFreeChips();
     }
 
     private void OnDestroy()
@@ -62,6 +78,7 @@ public class UIManager : MonoBehaviour
         {
             userMoney.OnMoneyChanged -= OnUserMoneyChanged;
             userMoney.OnBetChanged -= OnBetAmountChanged;
+            userMoney.OnPaymentChanged -= OnLastRoundEarningsChanged;
         }
     }
 
@@ -83,28 +100,24 @@ public class UIManager : MonoBehaviour
         OnConfirmButtonClicked?.Invoke();
     }
     
-    private void OnRemoveBetClicked()
-    {
-        OnRemoveBetButtonClicked?.Invoke();
-    }
-    
     private void OnResetBetClicked()
     {
         OnResetBetButtonClicked?.Invoke();
     }
     
     // Methods to control button visibility
-    public void SetConfirmButtonActive(bool isActive)
+    public void SetButtonActive(bool isActive)
     {
         if (confirmButton != null)
             confirmButton.gameObject.SetActive(isActive);
-    }
-    
-    public void SetResetBetButtonActive(bool isActive)
-    {
+
         if (resetBetButton != null)
             resetBetButton.gameObject.SetActive(isActive);
+
+        if (addFreeChipsButton != null)
+            addFreeChipsButton.gameObject.SetActive(isActive);
     }
+    
 
     /// <summary>
     /// Update the stats display with the current win/loss tracking information

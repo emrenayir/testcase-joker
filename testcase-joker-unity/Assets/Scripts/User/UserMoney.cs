@@ -53,12 +53,6 @@ public class UserMoney : MonoBehaviour
         }
 
         userMoney -= amount;
-
-        if (userMoney <= 0)
-        {
-            userMoney = 1000;
-            Debug.Log("Player money was reset to 1000 (demo mode)");
-        }
         
         OnMoneyChanged?.Invoke(userMoney);
     }
@@ -110,10 +104,8 @@ public class UserMoney : MonoBehaviour
         {
             AddMoney(currentPayment);
         }
-
-        currentPayment = 0;
         
-        Debug.Log($"Player money updated with payment: {payment}!");
+        Debug.Log($"Player money updated with payment: {payment}! Current payment set to: {currentPayment}");
     }
     
     public int GetCurrentMoney()
@@ -127,6 +119,15 @@ public class UserMoney : MonoBehaviour
     }
     
     /// <summary>
+    /// Gets the current payment amount
+    /// </summary>
+    /// <returns>The current payment amount</returns>
+    public int GetCurrentPayment()
+    {
+        return currentPayment;
+    }
+    
+    /// <summary>
     /// Sets the player's money amount directly (used for loading saved data)
     /// </summary>
     /// <param name="amount">The amount to set</param>
@@ -134,14 +135,6 @@ public class UserMoney : MonoBehaviour
     {
         // Make sure we don't set a negative amount
         userMoney = Mathf.Max(0, amount);
-        
-        // Auto-refill in demo mode if money is zero
-        if (userMoney <= 0)
-        {
-            userMoney = 1000;
-            Debug.Log("Player money was reset to 1000 (demo mode)");
-        }
-        
         OnMoneyChanged?.Invoke(userMoney);
         Debug.Log($"Player money set to: {userMoney}");
     }
@@ -156,5 +149,21 @@ public class UserMoney : MonoBehaviour
         currentBet = Mathf.Max(0, amount);
         OnBetChanged?.Invoke(currentBet);
         Debug.Log($"Current bet set to: {currentBet}");
+    }
+    
+    /// <summary>
+    /// Sets the last round earnings amount directly (used for loading saved data)
+    /// </summary>
+    /// <param name="amount">The payment amount to set</param>
+    public void SetCurrentPayment(int amount)
+    {
+        currentPayment = amount;
+        OnPaymentChanged?.Invoke(currentPayment);
+        Debug.Log($"Last round earnings set to: {currentPayment}");
+    }
+
+    public void AddFreeChips()
+    {
+        AddMoney(1000);
     }
 }

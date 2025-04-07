@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4557036eacfe42f396285de4319c206, type: 3}
   m_Name: Win
   m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: 02554c15be8fba1418333c54c38f9dee, type: 3}
+  clip: {fileID: 8300000, guid: 60ab8eb6d3d444e46943548a68e08de6, type: 3}
   volume: 1
   pitch: 1
   delay: 0

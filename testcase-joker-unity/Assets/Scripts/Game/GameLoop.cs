@@ -15,6 +15,8 @@ public class GameLoop : MonoBehaviour
     [SerializeField] private UIManager uiManager;
     [SerializeField] private PlayerSave playerSave;
 
+    [SerializeField] private ParticleSystem winParticles;
+
     // Win/Loss tracking
     private int totalSpins = 0;
     private int totalWins = 0;
@@ -41,10 +43,8 @@ public class GameLoop : MonoBehaviour
         // Load stats
         if (playerSave != null)
         {
-            // First try loading from the dedicated stats file
             var stats = playerSave.LoadPlayerStats();
             
-            // If that doesn't exist, we might have stats in the main save file
             if (stats == null && betController != null)
             {
                 stats = playerSave.LoadBets(betController);
@@ -113,7 +113,7 @@ public class GameLoop : MonoBehaviour
         // Enable confirm button
         if (uiManager != null)
         {
-            uiManager.SetConfirmButtonActive(true);
+            uiManager.SetButtonActive(true);
         }
         
         betController.IsBettingEnabled = true;
@@ -126,7 +126,7 @@ public class GameLoop : MonoBehaviour
         betController.IsBettingEnabled = false;
         if (uiManager != null)
         {
-            uiManager.SetConfirmButtonActive(false);
+            uiManager.SetButtonActive(false);
         }
         
         // Track the current bet amount for profit/loss calculation
@@ -146,7 +146,8 @@ public class GameLoop : MonoBehaviour
     {
         // Wait until roulette is no longer spinning
         // Use a reasonable delay to check periodically
-        yield return new WaitForSeconds(5f); // Adjust as needed
+        yield return new WaitForSeconds(8f); // Adjust as needed
+        
         
         // Move to results phase
         SetPhase(GamePhase.Results);
@@ -194,17 +195,15 @@ public class GameLoop : MonoBehaviour
         if (winnings > 0)
         {
             SoundManager.Instance.PlaySFX("Win");
+            winParticles.Play();
         }
         else
         {
             SoundManager.Instance.PlaySFX("Error");
         }
-        // Log stats
-        Debug.Log($"Round result: {(currentRoundProfit > 0 ? "Win" : "Loss")} | Profit: {currentRoundProfit} | " +
-                 $"Total: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");
-        
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
+        
         
         // Clear previous bets
         betController.ClearAllBets();
@@ -226,8 +225,4 @@ public class GameLoop : MonoBehaviour
         betController.ClearAllBets();
     }
     
-    // Getters for stat values
-    public int GetTotalSpins() => totalSpins;
-    public int GetTotalWins() => totalWins;
-    public int GetTotalProfit() => totalProfit;
 }

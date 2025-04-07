@@ -71,6 +71,7 @@ public class PlayerSave : MonoBehaviour
         {
             saveData.PlayerMoney = userMoney.GetCurrentMoney();
             saveData.CurrentBet = userMoney.GetCurrentBet();
+            saveData.LastRoundEarnings = userMoney.GetCurrentPayment();
         }
 
         string jsonData = JsonUtility.ToJson(saveData, true);
@@ -129,6 +130,10 @@ public class PlayerSave : MonoBehaviour
                 userMoney.SetCurrentBet(saveData.CurrentBet);
                 Debug.Log($"Loaded current bet: {saveData.CurrentBet}");
             }
+            
+            // Load last round earnings
+            userMoney.SetCurrentPayment(saveData.LastRoundEarnings);
+            Debug.Log($"Loaded last round earnings: {saveData.LastRoundEarnings}");
         }
 
         // Load bets data
@@ -191,6 +196,7 @@ public class PlayerSave : MonoBehaviour
         // Update money data
         saveData.PlayerMoney = userMoney.GetCurrentMoney();
         saveData.CurrentBet = userMoney.GetCurrentBet();
+        saveData.LastRoundEarnings = userMoney.GetCurrentPayment();
         
         // Save back to file
         string updatedJsonData = JsonUtility.ToJson(saveData, true);
@@ -278,6 +284,7 @@ public class PlayerSaveData
     public List<BetData> Bets = new List<BetData>();
     public int PlayerMoney = 1000; // Default starting money
     public int CurrentBet = 0;
+    public int LastRoundEarnings = 0;
     
     // Stats data
     public int TotalSpins = 0;
