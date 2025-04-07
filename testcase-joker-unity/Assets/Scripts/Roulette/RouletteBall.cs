@@ -19,12 +19,12 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
     [SerializeField] private Transform wheelCenter;
     [SerializeField] private List<Transform> circlePoints;
     [SerializeField] private RouletteSlot[] numberSlotPositions;
-    [SerializeField] private float rollDuration = 8f;
+    [SerializeField] private float rollDuration = 13f;
     [SerializeField] private float wheelRadius = 2f;
-    [SerializeField] private float initialCirclingSpeed = 15f;
     [SerializeField] private float targetApproachThreshold = 10f;
     [SerializeField] private float maxBounceHeight = 0.15f;
 
+    private RouletteController rouletteController;
     private int targetNumber = -1;
     private bool isRolling = false;
     private Vector3 targetPosition;
@@ -36,6 +36,11 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         public float startTime;
         public float height;
         public float duration;
+    }
+
+    void Awake()
+    {
+        rouletteController = GetComponentInParent<RouletteController>();
     }
 
     /// <summary>
@@ -56,9 +61,10 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         if (targetNumber == -1) return;
 
         StartCoroutine(RollBallCoroutine());
+        SoundManager.Instance.PlaySFX("Spin");
     }
 
-    // Use linq to find the index of the target slot
+    // TODO: Use linq to find the index of the target slot
     private int FindTargetSlotIndex(int targetNum)
     {
         for (int i = 0; i < numberSlotPositions.Length; i++)
@@ -87,10 +93,9 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         yield return ApproachTargetWithBounces();
         yield return SettleOnTarget();
         isRolling = false;
-        var rouletteController = GetComponentInParent<RouletteController>();
         if (rouletteController != null)
         {
-            rouletteController.OnSpinCompleted();
+            rouletteController.InvokeSpinCompleted();
         }
         else
         {
@@ -184,7 +189,6 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
             bezierPos.y += bounceAmount;
             bezierPos = KeepWithinWheelBounds(bezierPos, bounceAmount);
 
-            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, t * t);
             transform.position = bezierPos;
 
             yield return null;
@@ -215,13 +219,10 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
             }
 
             transform.position = position;
-            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, t);
 
             yield return null;
         }
 
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
         transform.position = targetPosition;
         rb.isKinematic = true;
     }

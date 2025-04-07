@@ -13,24 +13,17 @@ public class RouletteController : MonoBehaviour
     
     private bool isSpinning = false;
 
-    public Action OnSpinCompleted;
+    private Action onSpinCompleted;
 
     private void Awake() 
     {
-        OnSpinCompleted += () => 
+        onSpinCompleted += () => 
         {
             Debug.Log("Spin completed");
             isSpinning = false;
         };
     }
 
-    public void InvokeSpinCompleted()
-    {
-        OnSpinCompleted?.Invoke();
-    }
-
-
-    //TODO: this is for testing and will be removed later
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -39,16 +32,32 @@ public class RouletteController : MonoBehaviour
         }
     }
 
+    void OnDisable()
+    {
+        onSpinCompleted = null;
+    }
+
+    public void InvokeSpinCompleted()
+    {
+        onSpinCompleted?.Invoke();
+    }
+
+
     /// <summary>
     /// Starts the spin of the roulette wheel.
     /// </summary>
     public void StartRoulette()
     {
+        Debug.Log("Starting roulette");
         if (isSpinning) return;
         
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
         ball.StartRolling(targetNumber);
     }
-    
+
+    public int GetResult()
+    {
+        return outcomeManager.GetResult();
+    }
 }

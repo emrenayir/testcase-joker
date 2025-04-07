@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &924803576841928359
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3862964757180342980}
+  - component: {fileID: 8294783260922936559}
+  m_Layer: 0
+  m_Name: ChipPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3862964757180342980
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924803576841928359}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.075411364, y: 0.17926773, z: 0.049113132}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8294783260922936559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924803576841928359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ff5439a8d00e4b1c89dbda158554f4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chipSOs:
+  - {fileID: 11400000, guid: b9cfbfe53b8c94a118959b0f571a4f0f, type: 2}
+  - {fileID: 11400000, guid: f32f05ef707a44fd98514efdfbedbd32, type: 2}
+  - {fileID: 11400000, guid: 57db0b91014c1448e897a8af6cc1118b, type: 2}
+  - {fileID: 11400000, guid: 62e2a25741ce4432e83ee85e40b33e40, type: 2}
+  - {fileID: 11400000, guid: 37727d19405cd4e37bd99f1c19be4045, type: 2}
+  - {fileID: 11400000, guid: 0770fb74d55b84d46b8efcff8417c702, type: 2}
+  initialPoolSize: 10

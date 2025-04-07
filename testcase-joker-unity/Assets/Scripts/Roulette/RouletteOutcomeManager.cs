@@ -8,6 +8,8 @@ using UnityEngine;
 public class RouletteOutcomeManager : MonoBehaviour, IRouletteOutcomeProvider
 {
     [SerializeField] private int selectedNumber = -1; // -1 means random
+
+    private int result = -1;
     
     /// <summary>
     /// Sets the target number.
@@ -33,11 +35,21 @@ public class RouletteOutcomeManager : MonoBehaviour, IRouletteOutcomeProvider
         {
             int result = selectedNumber;
             selectedNumber = -1; // Reset after use
+
+            this.result = result;
             return result;
         }
         
         var randomNumber = Random.Range(0, 37);
         Debug.Log("Random number: " + randomNumber);
+        this.result = randomNumber;
         return randomNumber;
     }
+
+    public int GetResult()
+    {
+        return result;
+    }
+
+
 }
