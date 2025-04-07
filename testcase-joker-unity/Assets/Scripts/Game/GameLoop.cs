@@ -191,6 +191,14 @@ public class GameLoop : MonoBehaviour
             playerSave.SavePlayerStats(totalSpins, totalWins, totalProfit);
         }
         
+        if (winnings > 0)
+        {
+            SoundManager.Instance.PlaySFX("Win");
+        }
+        else
+        {
+            SoundManager.Instance.PlaySFX("Error");
+        }
         // Log stats
         Debug.Log($"Round result: {(currentRoundProfit > 0 ? "Win" : "Loss")} | Profit: {currentRoundProfit} | " +
                  $"Total: Spins: {totalSpins}, Wins: {totalWins}, Profit: {totalProfit}");

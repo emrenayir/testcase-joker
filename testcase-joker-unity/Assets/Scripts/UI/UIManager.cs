@@ -11,7 +11,8 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private UserMoney userMoney;
     [SerializeField] private Button confirmButton;
-    [SerializeField] private Button undoBetButton; //TODO: implement this
+
+    //[SerializeField] private Button undoBetButton; //TODO: implement this
     [SerializeField] private Button resetBetButton;
 
     [SerializeField] private TextMeshProUGUI betAmountText;
@@ -36,8 +37,6 @@ public class UIManager : MonoBehaviour
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnBetPlacementConfirmed);
             
-        if (undoBetButton != null)
-            undoBetButton.onClick.AddListener(OnRemoveBetClicked);
             
         if (resetBetButton != null)
             resetBetButton.onClick.AddListener(OnResetBetClicked);
@@ -49,6 +48,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        // Clean up listeners
+        if (confirmButton != null)
+            confirmButton.onClick.RemoveListener(OnBetPlacementConfirmed);
+            
+            
+        if (resetBetButton != null)
+            resetBetButton.onClick.RemoveListener(OnResetBetClicked);
+
+        if (userMoney != null)
+        {
+            userMoney.OnMoneyChanged -= OnUserMoneyChanged;
+            userMoney.OnBetChanged -= OnBetAmountChanged;
+        }
+    }
+
+
     private void OnBetAmountChanged(int value)
     {
         betAmountText.text = value.ToString();
@@ -57,19 +74,6 @@ public class UIManager : MonoBehaviour
     private void OnUserMoneyChanged(int value)
     {
         userMoneyText.text = value.ToString();
-    }
-
-    private void OnDestroy()
-    {
-        // Clean up listeners
-        if (confirmButton != null)
-            confirmButton.onClick.RemoveListener(OnBetPlacementConfirmed);
-            
-        if (undoBetButton != null)
-            undoBetButton.onClick.RemoveListener(OnRemoveBetClicked);
-            
-        if (resetBetButton != null)
-            resetBetButton.onClick.RemoveListener(OnResetBetClicked);
     }
 
     public void OnBetPlacementConfirmed()
@@ -94,12 +98,6 @@ public class UIManager : MonoBehaviour
     {
         if (confirmButton != null)
             confirmButton.gameObject.SetActive(isActive);
-    }
-    
-    public void SetRemoveBetButtonActive(bool isActive)
-    {
-        if (undoBetButton != null)
-            undoBetButton.gameObject.SetActive(isActive);
     }
     
     public void SetResetBetButtonActive(bool isActive)

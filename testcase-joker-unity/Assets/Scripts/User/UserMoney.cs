@@ -54,9 +54,10 @@ public class UserMoney : MonoBehaviour
 
         userMoney -= amount;
 
-        if (userMoney < 0)
+        if (userMoney <= 0)
         {
-            userMoney = 0;
+            userMoney = 1000;
+            Debug.Log("Player money was reset to 1000 (demo mode)");
         }
         
         OnMoneyChanged?.Invoke(userMoney);
@@ -133,6 +134,14 @@ public class UserMoney : MonoBehaviour
     {
         // Make sure we don't set a negative amount
         userMoney = Mathf.Max(0, amount);
+        
+        // Auto-refill in demo mode if money is zero
+        if (userMoney <= 0)
+        {
+            userMoney = 1000;
+            Debug.Log("Player money was reset to 1000 (demo mode)");
+        }
+        
         OnMoneyChanged?.Invoke(userMoney);
         Debug.Log($"Player money set to: {userMoney}");
     }

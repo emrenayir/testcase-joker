@@ -50,6 +50,7 @@ public class ChipSelectionButton : MonoBehaviour
         chipSelectionController.ChipButtonClick(this);
         if (isAnimating) return;
         StartCoroutine(FlipAnimation());
+        SoundManager.Instance.PlaySFX("Chip");
     }
 
     private IEnumerator FlipAnimation()

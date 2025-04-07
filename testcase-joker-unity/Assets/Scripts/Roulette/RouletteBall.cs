@@ -19,7 +19,7 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
     [SerializeField] private Transform wheelCenter;
     [SerializeField] private List<Transform> circlePoints;
     [SerializeField] private RouletteSlot[] numberSlotPositions;
-    [SerializeField] private float rollDuration = 8f;
+    [SerializeField] private float rollDuration = 13f;
     [SerializeField] private float wheelRadius = 2f;
     [SerializeField] private float targetApproachThreshold = 10f;
     [SerializeField] private float maxBounceHeight = 0.15f;
@@ -61,6 +61,7 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         if (targetNumber == -1) return;
 
         StartCoroutine(RollBallCoroutine());
+        SoundManager.Instance.PlaySFX("Spin");
     }
 
     // TODO: Use linq to find the index of the target slot

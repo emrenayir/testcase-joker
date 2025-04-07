@@ -113,6 +113,9 @@ public abstract class BetButton : MonoBehaviour, IBetButton
             return;
         } 
 
+        // Play the chip placement sound
+        SoundManager.Instance.PlaySFX("Chip");
+
         // Add the chip value to the total chip value for later payout calculation
         TotalChipValue += ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue);
 
