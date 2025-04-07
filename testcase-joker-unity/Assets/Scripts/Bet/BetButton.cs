@@ -32,6 +32,12 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     #endregion
 
     #region Unity Lifecycle Methods
+
+    void Awake()
+    {
+        // Get the box collider
+        cachedBoxCollider = GetComponent<BoxCollider>();
+    }
     protected virtual void Start()
     {
         // Get the quad renderer and material
@@ -42,8 +48,6 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         targetColor = tableColorSettings.normalColor;
         SetQuadColor(tableColorSettings.normalColor);
 
-        // Get the box collider
-        cachedBoxCollider = GetComponent<BoxCollider>();
 
         // Subscribe to the bet removed event
         betController.OnBetRemoved += ResetChips;
@@ -240,6 +244,77 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         {
             TransitionToColor(tableColorSettings.normalColor);
         }
+    }
+    #endregion
+
+    #region Save/Load Methods
+    /// <summary>
+    /// Get data about placed chips for saving
+    /// </summary>
+    public List<ChipData> GetPlacedChipsData()
+    {
+        List<ChipData> chipsData = new List<ChipData>();
+        
+        foreach (var chip in placedChips)
+        {
+            ChipData chipData = new ChipData
+            {
+                ChipValue = chip.GetChipValue(),
+                PositionY = chip.transform.position.y
+            };
+            
+            chipsData.Add(chipData);
+        }
+        
+        return chipsData;
+    }
+    
+    /// <summary>
+    /// Load bet data and recreate the chips
+    /// </summary>
+    public void LoadBetData(BetData betData)
+    {
+        // Reset current chip state if any
+        if (placedChips.Count > 0)
+        {
+            // Force immediate reset rather than animated - we're loading a saved state
+            foreach (Chip chip in placedChips)
+            {
+                if (chip != null)
+                {
+                    ChipPool.Instance.ReturnChip(chip.gameObject);
+                }
+            }
+            placedChips.Clear();
+            chipIndex = 0;
+            TotalChipValue = 0;
+        }
+        
+        TotalChipValue = betData.TotalChipValue;
+        
+        // Recreate chips from saved data
+        foreach (var chipData in betData.PlacedChipsData)
+        {
+            // Get chip from pool
+            Chip chip = ChipPool.Instance.GetChip(ChipHelper.GetChipTypeFromValue(chipData.ChipValue)).GetComponent<Chip>();
+            
+            // Set parent
+            chip.transform.SetParent(transform);
+            
+            // Position the chip using the saved position
+            Vector3 chipPosition = transform.TransformPoint(cachedBoxCollider.center);
+            chipPosition.y = chipData.PositionY;
+            chip.transform.position = chipPosition;
+            
+            // Add to the list of placed chips
+            placedChips.Add(chip);
+            
+            // Increment chip index
+            chipIndex++;
+        }
+        
+        // Add this bet to the active bets
+        betController.AddActiveBet(this);
     }
     #endregion
 

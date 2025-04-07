@@ -40,10 +40,6 @@ public class UIManager : MonoBehaviour
             userMoney.OnMoneyChanged += OnUserMoneyChanged;
             userMoney.OnBetChanged += OnBetAmountChanged;
         }
-        
-
-
-        
     }
 
     private void OnBetAmountChanged(int value)

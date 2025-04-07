@@ -62,9 +62,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 58421367380019046}
   - {fileID: 4858577000508304583}
   - {fileID: 948466788021730873}
+  - {fileID: 58421367380019046}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &941332227998862270
@@ -96,8 +96,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 600140458242189845}
-  - {fileID: 7581777731169377924}
   - {fileID: 57084030774463348}
   - {fileID: 8051902246563038598}
   - {fileID: 8871437700681872140}
@@ -133,6 +131,8 @@ Transform:
   - {fileID: 4542735143707852655}
   - {fileID: 237707416200073369}
   - {fileID: 5284619609956705006}
+  - {fileID: 600140458242189845}
+  - {fileID: 7581777731169377924}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1882356644372128897
@@ -164,7 +164,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1760239309850700766}
   - {fileID: 8589293655892555066}
   - {fileID: 1723190304201582720}
   - {fileID: 5435304856402446273}
@@ -186,6 +185,7 @@ Transform:
   - {fileID: 7352429935624122851}
   - {fileID: 6149697014761044972}
   - {fileID: 1951816363578303111}
+  - {fileID: 1760239309850700766}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2632772748903730055
@@ -217,7 +217,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7919553091854027352}
   - {fileID: 8677533468631523505}
   - {fileID: 6563763094743836678}
   - {fileID: 7487193003568737679}
@@ -250,6 +249,7 @@ Transform:
   - {fileID: 3677721451332540273}
   - {fileID: 6736561686102530003}
   - {fileID: 4807454180673843799}
+  - {fileID: 7919553091854027352}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4012494498434731883
@@ -437,6 +437,7 @@ MonoBehaviour:
   - {fileID: 4095499230264679119}
   - {fileID: 8895890465838821742}
   - {fileID: 3832579440315933584}
+  playerSave: {fileID: 0}
 --- !u!1 &5683427885213633409
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,8 +467,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1602377685571837709}
   - {fileID: 4879471388976702162}
+  - {fileID: 1602377685571837709}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6169610195107674534
@@ -499,7 +500,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4808667030426878329}
   - {fileID: 6451749214133293856}
   - {fileID: 1959835001544728327}
   - {fileID: 8257811522740677353}
@@ -510,6 +510,7 @@ Transform:
   - {fileID: 5939123042256452518}
   - {fileID: 5176322837248593296}
   - {fileID: 8747692925299983042}
+  - {fileID: 4808667030426878329}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6952344745234877334
@@ -541,9 +542,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3398481349876196028}
   - {fileID: 2853209296030406491}
   - {fileID: 7762628300131211797}
+  - {fileID: 3398481349876196028}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7187912015954366544
@@ -575,8 +576,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 75927668202080876}
   - {fileID: 1125669381542856701}
+  - {fileID: 75927668202080876}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7730562799605082229
@@ -608,7 +609,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8851200971089622883}
   - {fileID: 5346011015870102060}
   - {fileID: 2014631846538001641}
   - {fileID: 4853619673621427675}
@@ -620,6 +620,7 @@ Transform:
   - {fileID: 7475545307951676443}
   - {fileID: 54476834165756303}
   - {fileID: 5289723855978380966}
+  - {fileID: 8851200971089622883}
   m_Father: {fileID: 8118110242604167497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &129675592872779164
@@ -2291,7 +2292,7 @@ PrefabInstance:
     - target: {fileID: 6353028295794086618, guid: 8418cada2718d409ebee2a7aa12862ff,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointSplit (32)
       objectReference: {fileID: 0}
     - target: {fileID: 7869474031067904140, guid: 8418cada2718d409ebee2a7aa12862ff,
         type: 3}
@@ -2392,7 +2393,7 @@ PrefabInstance:
     - target: {fileID: 1935201366464947197, guid: 2c13acb1b4f2e49a0a2f501688e41a91,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointDosen (2)
       objectReference: {fileID: 0}
     - target: {fileID: 2101595618452382729, guid: 2c13acb1b4f2e49a0a2f501688e41a91,
         type: 3}
@@ -3421,7 +3422,7 @@ PrefabInstance:
     - target: {fileID: 4441692509274771688, guid: ba9ab88b754c143fdac5b2a4d3b3b3c2,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointColumn (2)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3795,7 +3796,7 @@ PrefabInstance:
     - target: {fileID: 3359170542337486358, guid: 8562a6f50ea0a4f269fcb24d1c3bf9ef,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointRed
       objectReference: {fileID: 0}
     - target: {fileID: 4276460961925944255, guid: 8562a6f50ea0a4f269fcb24d1c3bf9ef,
         type: 3}
@@ -4012,7 +4013,7 @@ PrefabInstance:
     - target: {fileID: 9151157339031512322, guid: 8c4ddf982f2f34f0293ee0f854225c9f,
         type: 3}
       propertyPath: m_Name
-      value: BetPointHighLow
+      value: BetPointHigh
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5134,7 +5135,7 @@ PrefabInstance:
     - target: {fileID: 8353907796181699170, guid: cc39772dcfb844d25b76000d52f8b595,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointStreet (11)
       objectReference: {fileID: 0}
     - target: {fileID: 8367234655717920150, guid: cc39772dcfb844d25b76000d52f8b595,
         type: 3}
@@ -6792,7 +6793,7 @@ PrefabInstance:
     - target: {fileID: 2816030147721875678, guid: bb1ff9686805844fd88e5576b862e864,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointSixLine (10)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6919,7 +6920,7 @@ PrefabInstance:
     - target: {fileID: 793000652642081243, guid: 3a3ec770aa649451096ed648fe9e1217,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint (1)
+      value: BetPointStraight (36)
       objectReference: {fileID: 0}
     - target: {fileID: 3176131858853899994, guid: 3a3ec770aa649451096ed648fe9e1217,
         type: 3}
@@ -7621,7 +7622,7 @@ PrefabInstance:
     - target: {fileID: 3359170542337486358, guid: 8562a6f50ea0a4f269fcb24d1c3bf9ef,
         type: 3}
       propertyPath: m_Name
-      value: BetPointRedBlack
+      value: BetPointBlack
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9986,7 +9987,7 @@ PrefabInstance:
     - target: {fileID: 9151157339031512322, guid: 8c4ddf982f2f34f0293ee0f854225c9f,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointLow
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10679,7 +10680,7 @@ PrefabInstance:
     - target: {fileID: 5636530635930351656, guid: 79f3e2730f2bc4b5e8a9c6a47c94c648,
         type: 3}
       propertyPath: m_Name
-      value: BetPointEvenOdd
+      value: BetPointOdd
       objectReference: {fileID: 0}
     - target: {fileID: 7577961968294154025, guid: 79f3e2730f2bc4b5e8a9c6a47c94c648,
         type: 3}
@@ -10891,7 +10892,7 @@ PrefabInstance:
     - target: {fileID: 5636530635930351656, guid: 79f3e2730f2bc4b5e8a9c6a47c94c648,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointEven
       objectReference: {fileID: 0}
     - target: {fileID: 7577961968294154025, guid: 79f3e2730f2bc4b5e8a9c6a47c94c648,
         type: 3}
@@ -12473,7 +12474,7 @@ PrefabInstance:
     - target: {fileID: 5001428805710749331, guid: 244b9695d73fd485183a2316a55df34b,
         type: 3}
       propertyPath: m_Name
-      value: BetPoint
+      value: BetPointCorner (21)
       objectReference: {fileID: 0}
     - target: {fileID: 7095997345680091538, guid: 244b9695d73fd485183a2316a55df34b,
         type: 3}

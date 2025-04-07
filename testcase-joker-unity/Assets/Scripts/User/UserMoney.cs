@@ -17,12 +17,25 @@ public class UserMoney : MonoBehaviour
     public event Action<int> OnBetChanged;
     public event Action<int> OnPaymentChanged;
 
+
+    [SerializeField] private UIManager uiManager;
+
     private void Start()
     {
         // Initialize events
         OnMoneyChanged?.Invoke(userMoney);
         OnBetChanged?.Invoke(currentBet);
         OnPaymentChanged?.Invoke(currentPayment);
+
+        uiManager.OnResetBetButtonClicked += OnResetBetButtonClicked;
+    }
+
+    private void OnResetBetButtonClicked()
+    {
+        //return bet to user
+        AddMoney(currentBet);
+        currentBet = 0;
+        OnBetChanged?.Invoke(currentBet);
     }
 
     // Operations on player money
@@ -110,5 +123,29 @@ public class UserMoney : MonoBehaviour
     public int GetCurrentBet()
     {
         return currentBet;
+    }
+    
+    /// <summary>
+    /// Sets the player's money amount directly (used for loading saved data)
+    /// </summary>
+    /// <param name="amount">The amount to set</param>
+    public void SetMoney(int amount)
+    {
+        // Make sure we don't set a negative amount
+        userMoney = Mathf.Max(0, amount);
+        OnMoneyChanged?.Invoke(userMoney);
+        Debug.Log($"Player money set to: {userMoney}");
+    }
+    
+    /// <summary>
+    /// Sets the current bet amount directly (used for loading saved data)
+    /// </summary>
+    /// <param name="amount">The bet amount to set</param>
+    public void SetCurrentBet(int amount)
+    {
+        // Make sure we don't set a negative amount
+        currentBet = Mathf.Max(0, amount);
+        OnBetChanged?.Invoke(currentBet);
+        Debug.Log($"Current bet set to: {currentBet}");
     }
 }

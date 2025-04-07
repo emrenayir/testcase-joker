@@ -10,6 +10,15 @@ public class Chip : MonoBehaviour
     public ChipValue value;
 
     /// <summary>
+    /// Returns the value of this chip
+    /// </summary>
+    /// <returns>The integer value of the chip</returns>
+    public int GetChipValue()
+    {
+        return ChipHelper.GetChipValue(value);
+    }
+
+    /// <summary>
     /// Animate chip placement with scale and position effects
     /// </summary>
     public void PlayPlacementAnimation()

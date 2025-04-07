@@ -1,0 +1,186 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+/// <summary>
+/// This class handles saving and loading of bet data using JSON
+/// </summary>
+public class PlayerSave : MonoBehaviour
+{
+    private string saveFilePath;
+    [SerializeField] private UserMoney userMoney;
+
+    private void Awake()
+    {
+        saveFilePath = Path.Combine(Application.persistentDataPath, "player_data.json");
+    }
+
+    /// <summary>
+    /// Save the active bets to JSON file
+    /// </summary>
+    /// <param name="activeBets">List of active bet buttons</param>
+    public void SaveBets(List<BetButton> activeBets)
+    {
+        PlayerSaveData saveData = new PlayerSaveData();
+        
+        // Save bets data
+        if (activeBets != null && activeBets.Count > 0)
+        {
+            foreach (var bet in activeBets)
+            {
+                BetData betData = new BetData
+                {
+                    BetButtonName = bet.gameObject.name,
+                    BetType = bet.GetBetType().ToString(),
+                    TotalChipValue = bet.TotalChipValue,
+                    PlacedChipsData = bet.GetPlacedChipsData()
+                };
+
+                saveData.Bets.Add(betData);
+            }
+        }
+        
+        // Save player money data
+        if (userMoney != null)
+        {
+            saveData.PlayerMoney = userMoney.GetCurrentMoney();
+            saveData.CurrentBet = userMoney.GetCurrentBet();
+        }
+
+        string jsonData = JsonUtility.ToJson(saveData, true);
+        File.WriteAllText(saveFilePath, jsonData);
+
+        Debug.Log($"Saved {saveData.Bets.Count} bets and player money data to {saveFilePath}");
+    }
+    
+
+    [ContextMenu("ClearSavedBets")]
+    /// <summary>
+    /// Clear all saved data by deleting the save file
+    /// </summary>
+    public void ClearSavedBets()
+    {
+        if (File.Exists(saveFilePath))
+        {
+            File.Delete(saveFilePath);
+            Debug.Log("Deleted saved game data");
+        }
+    }
+
+    /// <summary>
+    /// Load saved bets from JSON and restore them to the game
+    /// </summary>
+    /// <param name="betController">Reference to the bet controller</param>
+    public void LoadBets(BetController betController)
+    {
+        if (!File.Exists(saveFilePath))
+        {
+            Debug.Log("No saved data found");
+            return;
+        }
+
+        string jsonData = File.ReadAllText(saveFilePath);
+        PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(jsonData);
+
+        if (saveData == null)
+        {
+            Debug.Log("No valid save data found");
+            return;
+        }
+        
+        // Load player money data
+        if (userMoney != null)
+        {
+            if (saveData.PlayerMoney > 0)
+            {
+                userMoney.SetMoney(saveData.PlayerMoney);
+                Debug.Log($"Loaded player money: {saveData.PlayerMoney}");
+            }
+            
+            if (saveData.CurrentBet > 0)
+            {
+                userMoney.SetCurrentBet(saveData.CurrentBet);
+                Debug.Log($"Loaded current bet: {saveData.CurrentBet}");
+            }
+        }
+
+        // Load bets data
+        if (saveData.Bets == null || saveData.Bets.Count == 0)
+        {
+            Debug.Log("No bet data found in save file");
+            return;
+        }
+
+        List<BetButton> betButtons = betController.GetBetButtons();
+
+        int loadedBetsCount = 0;
+        foreach (var betData in saveData.Bets)
+        {
+            // Find the bet button by name
+            BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
+            if (betButton != null)
+            {
+                betButton.LoadBetData(betData);
+                loadedBetsCount++;
+            }
+        }
+
+        Debug.Log($"Loaded {loadedBetsCount} bets from {saveFilePath}");
+    }
+    
+    /// <summary>
+    /// Save only the player money data
+    /// </summary>
+    public void SavePlayerMoneyOnly()
+    {
+        if (userMoney == null) return;
+        
+        // If save file exists, load it first to preserve bet data
+        PlayerSaveData saveData = new PlayerSaveData();
+        if (File.Exists(saveFilePath))
+        {
+            string jsonData = File.ReadAllText(saveFilePath);
+            saveData = JsonUtility.FromJson<PlayerSaveData>(jsonData);
+            
+            if (saveData == null)
+            {
+                saveData = new PlayerSaveData();
+            }
+        }
+        
+        // Update money data
+        saveData.PlayerMoney = userMoney.GetCurrentMoney();
+        saveData.CurrentBet = userMoney.GetCurrentBet();
+        
+        // Save back to file
+        string updatedJsonData = JsonUtility.ToJson(saveData, true);
+        File.WriteAllText(saveFilePath, updatedJsonData);
+        
+        Debug.Log($"Saved player money data: {saveData.PlayerMoney}");
+    }
+}
+
+[Serializable]
+public class PlayerSaveData
+{
+    public List<BetData> Bets = new List<BetData>();
+    public int PlayerMoney = 1000; // Default starting money
+    public int CurrentBet = 0;
+}
+
+[Serializable]
+public class BetData
+{
+    public string BetButtonName;
+    public string BetType;
+    public int TotalChipValue;
+    public List<ChipData> PlacedChipsData = new List<ChipData>();
+}
+
+[Serializable]
+public class ChipData
+{
+    public int ChipValue;
+    public float PositionY;
+} 

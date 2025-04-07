@@ -139,6 +139,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 183558, guid: 449ef6058c4cc054b80ec0de168b74c5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 433342, guid: 449ef6058c4cc054b80ec0de168b74c5, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -172,7 +176,9 @@ PrefabInstance:
       value: -0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 179426, guid: 449ef6058c4cc054b80ec0de168b74c5, type: 3}
+    - {fileID: 118924, guid: 449ef6058c4cc054b80ec0de168b74c5, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 449ef6058c4cc054b80ec0de168b74c5, type: 3}
@@ -306,6 +312,7 @@ MonoBehaviour:
   userMoney: 1000
   currentBet: 0
   currentPayment: 0
+  uiManager: {fileID: 664258796}
 --- !u!4 &1103338745
 Transform:
   m_ObjectHideFlags: 0
@@ -494,6 +501,51 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1339960511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1339960513}
+  - component: {fileID: 1339960512}
+  m_Layer: 0
+  m_Name: PlayerSave
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1339960512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339960511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61681484c24f64331b927d00bb730d23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  userMoney: {fileID: 1103338744}
+--- !u!4 &1339960513
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339960511}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.57357603, y: -0, z: -0, w: 0.81915236}
+  m_LocalPosition: {x: 0.047255825, y: 1.064, z: -0.151}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1543,7 +1595,7 @@ GameObject:
   - component: {fileID: 380426685336615952}
   - component: {fileID: 6911693594961586507}
   m_Layer: 5
-  m_Name: Canvas UI
+  m_Name: CanvasUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1732,6 +1784,11 @@ PrefabInstance:
       propertyPath: userMoney
       value: 
       objectReference: {fileID: 1103338744}
+    - target: {fileID: 5148514698946228037, guid: cc031cdc76db34d3e88b5e29ab076f40,
+        type: 3}
+      propertyPath: playerSave
+      value: 
+      objectReference: {fileID: 1339960512}
     - target: {fileID: 5148514698946228037, guid: cc031cdc76db34d3e88b5e29ab076f40,
         type: 3}
       propertyPath: chipSelectionController
@@ -2584,6 +2641,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 498980566}
+  - {fileID: 1339960513}
   - {fileID: 1849915551}
   - {fileID: 1401962145}
   - {fileID: 1580191167}

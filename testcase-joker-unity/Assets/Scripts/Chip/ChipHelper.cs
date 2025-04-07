@@ -1,4 +1,3 @@
-
 /// <summary>
 /// A helper class for the chip system.
 /// </summary>
@@ -24,6 +23,30 @@ public static class ChipHelper
     {
         return (int)chipValue;
     }
-
-
+    
+    /// <summary>
+    /// Returns the ChipValue enum from the integer value
+    /// </summary>
+    public static ChipValue GetChipTypeFromValue(int value)
+    {
+        switch (value)
+        {
+            case 1:
+                return ChipValue.One;
+            case 5:
+                return ChipValue.Five;
+            case 25:
+                return ChipValue.TwentyFive;
+            case 100:
+                return ChipValue.Hundred;
+            case 500:
+                return ChipValue.FiveHundred;
+            case 1000:
+                return ChipValue.Thousand;
+            default:
+                // Default to the smallest chip if value doesn't match
+                UnityEngine.Debug.LogWarning($"No ChipValue found for {value}, defaulting to One");
+                return ChipValue.One;
+        }
+    }
 }

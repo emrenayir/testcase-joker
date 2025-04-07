@@ -75,8 +75,6 @@ public class GameLoop : MonoBehaviour
             uiManager.SetConfirmButtonActive(true);
         }
         
-        // Clear previous bets
-        betController.ClearAllBets();
         betController.IsBettingEnabled = true;
     }
 
@@ -123,6 +121,9 @@ public class GameLoop : MonoBehaviour
         
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
+        
+        // Clear previous bets
+        betController.ClearAllBets();
         
         // Return to chip selection phase
         SetPhase(GamePhase.BetPlacement);
