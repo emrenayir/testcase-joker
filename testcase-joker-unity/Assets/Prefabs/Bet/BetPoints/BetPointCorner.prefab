@@ -115,6 +115,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 520f8eb3a13b24e62be7350a0d1460e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorTransitionSpeed: 5
+  TotalChipValue: 0
   tableColorSettings: {fileID: 11400000, guid: 46c23ffeb2aa04dd19850da2f7a3f407, type: 2}
+  quadRenderer: {fileID: 5682997175012762319}
   startNumber: 0
+--- !u!23 &5682997175012762319 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 362809150582619227, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
+    type: 3}
+  m_PrefabInstance: {fileID: 5464830978408308372}
+  m_PrefabAsset: {fileID: 0}

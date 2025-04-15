@@ -1,33 +1,35 @@
 using UnityEngine;
 
-public class CornerBet : BetButton
+namespace Bet
 {
-    [SerializeField] private int startNumber; // Bottom-left number in the corner
-    
-    private int[] numbers = new int[4];
-    
-    protected override void Start()
+    public class CornerBet : BetButton
     {
-        base.Start();
-        // For a corner bet, we need to handle the 4 adjacent numbers
-        numbers[0] = startNumber;
-        numbers[1] = startNumber + 1;
-        numbers[2] = startNumber + 3;
-        numbers[3] = startNumber + 4;
-    }
+        [SerializeField] private int startNumber; // Bottom-left number in the corner
     
-    public override BetType GetBetType()
-    {
-        return BetType.Corner;
-    }
+        private int[] numbers = new int[4];
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 4; // Corner bet covers 4 numbers
-    }
+        protected override void Start()
+        {
+            base.Start();
+            // For a corner bet, we need to handle the 4 adjacent numbers
+            for (int i = 0; i < 4; i++) {
+                numbers[i] = startNumber + (i < 2 ? i : i + 1);
+            }
+        }
     
-    public override bool IsWinner(int winningNumber)
-    {
-        return System.Array.IndexOf(numbers, winningNumber) != -1;
+        public override BetType GetBetType()
+        {
+            return BetType.Corner;
+        }
+    
+        public override int GetCoveredNumbersCount()
+        {
+            return 4; // Corner bet covers 4 numbers
+        }
+    
+        public override bool IsWinner(int winningNumber)
+        {
+            return System.Array.IndexOf(numbers, winningNumber) != -1;
+        }
     }
 } 

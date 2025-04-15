@@ -102,6 +102,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 7869474031067904140}
   m_SourcePrefab: {fileID: 100100000, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab, type: 3}
+--- !u!23 &6024927077351517830 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 362809150582619227, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
+    type: 3}
+  m_PrefabInstance: {fileID: 6238649048238625501}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6353028295794086618 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1062391918397767687, guid: cf941db36e3d84a2b9c7e4b8efe4b2ab,
@@ -120,6 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 414f2f343c9644753a1acb07b6ac3c04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorTransitionSpeed: 5
+  TotalChipValue: 0
   tableColorSettings: {fileID: 11400000, guid: 46c23ffeb2aa04dd19850da2f7a3f407, type: 2}
-  numbers: 0000000000000000
+  quadRenderer: {fileID: 6024927077351517830}
+  firstNumber: 0

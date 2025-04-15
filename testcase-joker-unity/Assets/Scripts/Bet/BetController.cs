@@ -1,199 +1,183 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
+using Chips;
+using EventBus;
+using Game;
 using UnityEngine;
+using User;
 
-/// <summary>
-/// This class is the controller for the bet.
-/// It handles the bet placement and the result processing.
-/// </summary>
-public class BetController : MonoBehaviour
+namespace Bet
 {
-    public event Action OnBetRemoved;
-    public event Action<BetButton> OnBetPlaced;
-    public bool IsBettingEnabled = true;
-
-    [SerializeField] private ChipSelectionController chipSelectionController;
-    [SerializeField] private UserMoney userMoney;
-    [SerializeField] private List<BetButton> betButtons;
-    [SerializeField] private PlayerSave playerSave;
-
-    private List<BetButton> activeBets = new List<BetButton>();
-
-    void Awake()
+    /// <summary>
+    /// This class is the controller for the bet.
+    /// It handles the bet placement and the result processing.
+    /// </summary>
+    public class BetController : MonoBehaviour
     {
-        OnBetPlaced += HandleBet;
+        public bool IsBettingEnabled = true;
 
-        foreach (var betButton in betButtons)
+        [SerializeField] private ChipSelectionController chipSelectionController;
+        [SerializeField] private List<BetButton> betButtons;
+
+        private List<BetButton> activeBets = new List<BetButton>();
+        private int winningNumber;
+
+        void Awake()
         {
-            betButton.SetBetButton(chipSelectionController, this, userMoney);
+            foreach (var betButton in betButtons)
+            {
+                betButton.SetBetButton(chipSelectionController, this);
+            }
+
+            EventManager.Instance.RegisterEvent<ResetBetButtonEvent>(ClearAllBets);
+            EventManager.Instance.RegisterEvent<GameStateChangeEvent>(OnGameStateChanged);
+            EventManager.Instance.RegisterEvent<RouletteFinishedEvent>(OnRouletteFinished);
+            EventManager.Instance.RegisterEvent<LoadSavedBetsEvent>(OnLoadSavedBets);
         }
-    }
-    
-    void Start()
-    {
-        // Load saved bets when the game starts
-        if (playerSave != null)
+
+        private void OnRouletteFinished(RouletteFinishedEvent @event)
         {
-            playerSave.LoadBets(this);
+            winningNumber = @event.WinningNumber;
+            StartCoroutine(ProcessResult());
         }
-    }
-    
-    void OnApplicationQuit()
-    {
-        // Save bets when the game is closed
-        SaveBets();
-    }
-    
-    void OnApplicationPause(bool pauseStatus)
-    {
-        // Save bets when the game is paused (mobile or tab switching)
-        if (pauseStatus)
+
+        private void OnGameStateChanged(GameStateChangeEvent @event)
         {
+            IsBettingEnabled = @event.NewState == GameState.InBet;
+        }
+    
+        private void OnLoadSavedBets(LoadSavedBetsEvent @event)
+        {
+            List<BetData> savedBets = @event.SavedBets;
+        
+            if (savedBets != null && savedBets.Count > 0)
+            {
+                foreach (var betData in savedBets)
+                {
+                    BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
+                    if (betButton != null)
+                    {
+                        betButton.LoadBetData(betData);
+                        if (!activeBets.Contains(betButton))
+                        {
+                            activeBets.Add(betButton);
+                        }
+                    }
+                }
+            }
+        }
+
+        void OnApplicationQuit()
+        {
+            // Save bets when the game is closed
             SaveBets();
         }
-    }
-    
-    private void SaveBets()
-    {
-        if (playerSave != null)
+
+        void OnApplicationPause(bool pauseStatus)
+        {
+            // Save bets when the game is paused (mobile or tab switching)
+            if (pauseStatus)
+            {
+                SaveBets();
+            }
+        }
+
+        private void SaveBets()
         {
             if (activeBets.Count > 0)
             {
-                playerSave.SaveBets(activeBets);
+                EventManager.Instance.Raise(new SaveBetsEvent { ActiveBets = activeBets });
             }
-            else
+        }
+
+        public void InvokePlaceBet(BetButton betButton)
+        {
+            HandleBet(betButton);
+        }
+
+        private void HandleBet(BetButton betButton)
+        {
+            int chipValue = ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue);
+            EventManager.Instance.Raise(new PlaceBetEvent { ChipValue = chipValue });
+
+            //Check if the bet is already in the list
+            if (activeBets.Contains(betButton))
             {
-                // Even if there are no active bets, save the player money
-                playerSave.SavePlayerMoneyOnly();
+                return;
             }
-        }
-    }
-
-    public void InvokePlaceBet(BetButton betButton)
-    {
-        OnBetPlaced?.Invoke(betButton);
-    }
-
-    private void HandleBet(BetButton betButton)
-    {
-        userMoney.PlaceBet(ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue));
-
-        //Check if the bet is already in the list
-        if (activeBets.Contains(betButton))
-        {
-            return;
-        }
-        activeBets.Add(betButton);
-    }
-
-    /// <summary>
-    /// Process the result of the bet
-    /// </summary>
-    /// <param name="winningNumber">The winning number</param>
-    public void ProcessResult(int winningNumber)
-    {
-        int totalWinnings = 0;
-        int lostBets = 0;
-
-        foreach (var bet in activeBets)
-        {
-            //Check if the bet is a winner
-            bool isWinner = bet.IsWinner(winningNumber);
-
-            //Indicate the winning status of the bet
-            bet.ShowWinningStatus(isWinner);
-
-            //Calculate the payout
-            if (isWinner)
-            {
-                Debug.Log($"Bet {bet.GetBetType()} $ {bet.gameObject.name} is a winner. Total chip value: {bet.TotalChipValue}");
-                totalWinnings += bet.CalculatePayout(bet.TotalChipValue);
-            }
-            else
-            {
-                lostBets += bet.TotalChipValue;
-            }
-        }
-
-        userMoney.ProcessPayment(totalWinnings, lostBets);
-
-        Debug.Log($"Winning number: {winningNumber}. Total winnings: {totalWinnings}");
-        
-        // Save the player's money after processing results
-        if (playerSave != null)
-        {
-            playerSave.SavePlayerMoneyOnly();
-        }
-        
-        // After processing the round, clear the active bets and saved data
-        // This should be called by a "New Round" function in your game
-        // If you want automatic clearing after each round, uncomment the next line:
-        // ClearAllBets();
-    }
-
-    /// <summary>
-    /// Clear all bets
-    /// </summary>
-    public void ClearAllBets()
-    {
-        activeBets.Clear();
-        OnBetRemoved?.Invoke();
-        
-        // Clear saved bets data as well
-        if (playerSave != null)
-        {
-            playerSave.ClearSavedBets();
-        }
-    }
-    
-    
-    /// <summary>
-    /// Add a bet to the active bets list if it's not already there
-    /// </summary>
-    public void AddActiveBet(BetButton betButton)
-    {
-        if (!activeBets.Contains(betButton))
-        {
             activeBets.Add(betButton);
         }
-    }
-    
-    /// <summary>
-    /// Get the list of bet buttons
-    /// </summary>
-    public List<BetButton> GetBetButtons()
-    {
-        return betButtons;
-    }
-    
-    /// <summary>
-    /// Get the list of active bets
-    /// </summary>
-    public List<BetButton> GetActiveBets()
-    {
-        return activeBets;
-    }
 
-    /// <summary>
-    /// Reset the entire game state
-    /// </summary>
-    public void ResetGame()
-    {
-        // Clear all bets (which also clears saved data)
-        ClearAllBets();
-        
-        // Reset player money to default value if needed
-        if (userMoney != null)
+        /// <summary>
+        /// Process the result of the bet
+        /// </summary>
+        public IEnumerator ProcessResult()
         {
-            userMoney.SetMoney(1000); // Reset to default starting money
-        }
+            int totalWinnings = 0;
+            int lostBets = 0;
+
+            foreach (var bet in activeBets)
+            {
+                //Check if the bet is a winner
+                bool isWinner = bet.IsWinner(winningNumber);
+
+                //Indicate the winning status of the bet
+                bet.ShowWinningStatus(isWinner);
+
+                //Calculate the payout
+                if (isWinner)
+                {
+                    totalWinnings += bet.CalculatePayout(bet.TotalChipValue);
+                }
+                else
+                {
+                    lostBets += bet.TotalChipValue;
+                }
+            }
+
+            EventManager.Instance.Raise(new ProcessPaymentEvent { Payment = totalWinnings, LostBets = lostBets });
+
+            // Wait for a moment before starting a new round
+            yield return new WaitForSeconds(3f);
+
+            EventManager.Instance.Raise(new BetProcessingFinishedEvent { IsWinner = totalWinnings - lostBets > 0 });
         
-        // Save the reset state
-        if (playerSave != null)
+        
+            ClearAllBets();
+        }
+
+        /// <summary>
+        /// Clear all bets
+        /// </summary>
+        public void ClearAllBets()
         {
-            playerSave.SavePlayerMoneyOnly();
-        }
+            foreach (var bet in activeBets)
+            {
+                bet.ResetChips();
+            }
+            activeBets.Clear();
         
-        Debug.Log("Game has been reset. All bets cleared and money reset.");
+            EventManager.Instance.Raise(new ClearSavedBetsEvent());
+        }
+
+
+        /// <summary>
+        /// Add a bet to the active bets list if it's not already there
+        /// </summary>
+        public void AddActiveBet(BetButton betButton)
+        {
+            if (!activeBets.Contains(betButton))
+            {
+                activeBets.Add(betButton);
+            }
+        }
+
+        /// <summary>
+        /// Get the list of bet buttons
+        /// </summary>
+        public List<BetButton> GetBetButtons()
+        {
+            return betButtons;
+        }
     }
 }

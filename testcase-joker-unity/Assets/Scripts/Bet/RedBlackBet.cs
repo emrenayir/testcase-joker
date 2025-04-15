@@ -1,32 +1,35 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class RedBlackBet : BetButton
+namespace Bet
 {
-    [SerializeField] private bool isRed;
-    
-    // Red numbers in roulette
-    private static readonly HashSet<int> redNumbers = new HashSet<int> 
-    { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
-    
-    public override BetType GetBetType()
+    public class RedBlackBet : BetButton
     {
-        return BetType.RedBlack;
-    }
+        [SerializeField] private bool isRed;
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 18; // Red/Black bet covers 18 numbers
-    }
+        // Red numbers in roulette
+        private static readonly HashSet<int> redNumbers = new HashSet<int> 
+            { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
     
-    public override bool IsWinner(int winningNumber)
-    {
-        if (winningNumber == 0)
+        public override BetType GetBetType()
         {
-            return false; // Zero is neither red nor black
+            return BetType.RedBlack;
         }
+    
+        public override int GetCoveredNumbersCount()
+        {
+            return 18; // Red/Black bet covers 18 numbers
+        }
+    
+        public override bool IsWinner(int winningNumber)
+        {
+            if (winningNumber == 0)
+            {
+                return false; // Zero is neither red nor black
+            }
         
-        bool isNumberRed = redNumbers.Contains(winningNumber);
-        return isRed ? isNumberRed : !isNumberRed;
+            bool isNumberRed = redNumbers.Contains(winningNumber);
+            return isRed ? isNumberRed : !isNumberRed;
+        }
     }
 } 

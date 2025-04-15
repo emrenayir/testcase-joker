@@ -1,32 +1,35 @@
 using UnityEngine;
 
-public class EvenOddBet : BetButton
+namespace Bet
 {
-    [SerializeField] private bool isEven;
-    
-    public override BetType GetBetType()
+    public class EvenOddBet : BetButton
     {
-        return BetType.EvenOdd;
-    }
+        [SerializeField] private bool isEven;
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 18; // Even/Odd bet covers 18 numbers
-    }
-    
-    public override bool IsWinner(int winningNumber)
-    {
-        if (winningNumber == 0)
+        public override BetType GetBetType()
         {
-            return false; // Zero is neither even nor odd in roulette
+            return BetType.EvenOdd;
         }
-        
-        bool numberIsEven = winningNumber % 2 == 0;
-        return isEven == numberIsEven;
-    }
     
-    public override int CalculatePayout(int betAmount)
-    {
-        return (int)(betAmount * GetPayout());
+        public override int GetCoveredNumbersCount()
+        {
+            return 18; // Even/Odd bet covers 18 numbers
+        }
+    
+        public override bool IsWinner(int winningNumber)
+        {
+            if (winningNumber == 0)
+            {
+                return false; // Zero is neither even nor odd in roulette
+            }
+        
+            bool numberIsEven = winningNumber % 2 == 0;
+            return isEven == numberIsEven;
+        }
+    
+        public override int CalculatePayout(int betAmount)
+        {
+            return (int)(betAmount * GetPayout());
+        }
     }
 } 

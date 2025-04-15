@@ -1,55 +1,45 @@
 using UnityEngine;
 
-/// <summary>
-/// This script is responsible for managing the outcome of the roulette wheel.
-/// It is responsible for selecting the target number and handling the random number generation.
-/// -1 is used to indicate that the number is not yet selected.
-/// </summary>
-public class RouletteOutcomeManager : MonoBehaviour, IRouletteOutcomeProvider
+namespace Roulette
 {
-    [SerializeField] private int selectedNumber = -1; // -1 means random
-
-    private int result = -1;
-    
     /// <summary>
-    /// Sets the target number.
-    /// It will be used by the roulette ball to determine the target slot.
+    /// This script is responsible for managing the outcome of the roulette wheel.
+    /// It is responsible for selecting the target number and handling the random number generation.
+    /// -1 is used to indicate that the number is not yet selected.
     /// </summary>
-    /// <param name="number">The number to set the target to.</param>
-    public void SetSelectedNumber(int number)
+    public class RouletteOutcomeManager : MonoBehaviour
     {
-        if (number >= 0 && number <= 36) 
-        {
-            selectedNumber = number;
-        }
-    }
+        [SerializeField] private int selectedNumber = -1; // -1 means random
     
-    /// <summary>
-    /// Gets the target number.
-    /// If the target number is not yet selected, a random number is generated.
-    /// </summary>
-    /// <returns>The target number.</returns>
-    public int GetTargetNumber()
-    {
-        if (selectedNumber >= 0)
+        /// <summary>
+        /// Sets the target number.
+        /// It will be used by the roulette ball to determine the target slot.
+        /// </summary>
+        /// <param name="number">The number to set the target to.</param>
+        public void SetSelectedNumber(int number)
         {
-            int result = selectedNumber;
-            selectedNumber = -1; // Reset after use
-
-            this.result = result;
-            return result;
+            if (number >= 0 && number <= 36) 
+            {
+                selectedNumber = number;
+            }
         }
+    
+        /// <summary>
+        /// Gets the target number.
+        /// If the target number is not yet selected, a random number is generated.
+        /// </summary>
+        /// <returns>The target number.</returns>
+        public int GetTargetNumber()
+        {
+            if (selectedNumber >= 0)
+            {
+                int tempResult = selectedNumber;
+                selectedNumber = -1; 
+                return tempResult;
+            }
         
-        var randomNumber = Random.Range(0, 37);
-        Debug.Log("Random number: " + randomNumber);
-        this.result = randomNumber;
-        return randomNumber;
+            var randomNumber = Random.Range(0, 37);
+            return randomNumber;
+        }
     }
-
-    public int GetResult()
-    {
-        return result;
-    }
-
-
 }

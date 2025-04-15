@@ -1,4 +1,7 @@
 using System;
+using EventBus;
+using Game;
+using Roulette;
 using UnityEngine;
 
 /// <summary>
@@ -7,57 +10,38 @@ using UnityEngine;
 /// </summary>
 public class RouletteController : MonoBehaviour
 {
-    [SerializeField] private RouletteWheel wheel;
     [SerializeField] private RouletteBall ball;
     [SerializeField] private RouletteOutcomeManager outcomeManager;
     
     private bool isSpinning = false;
 
-    private Action onSpinCompleted;
-
     private void Awake() 
     {
-        onSpinCompleted += () => 
-        {
-            Debug.Log("Spin completed");
-            isSpinning = false;
-        };
+        EventManager.Instance.RegisterEvent<GameStateChangeEvent>(OnGameStateChanged);
+        EventManager.Instance.RegisterEvent<RouletteFinishedEvent>(OnRouletteFinished);
     }
 
-    void Update()
+    private void OnRouletteFinished(RouletteFinishedEvent @event)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        isSpinning = false;
+    }
+
+    private void OnGameStateChanged(GameStateChangeEvent @event)
+    {
+        if(@event.NewState == GameState.Running)
         {
             StartRoulette();
         }
     }
-
-    void OnDisable()
-    {
-        onSpinCompleted = null;
-    }
-
-    public void InvokeSpinCompleted()
-    {
-        onSpinCompleted?.Invoke();
-    }
-
 
     /// <summary>
     /// Starts the spin of the roulette wheel.
     /// </summary>
     public void StartRoulette()
     {
-        Debug.Log("Starting roulette");
         if (isSpinning) return;
-        
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
         ball.StartRolling(targetNumber);
-    }
-
-    public int GetResult()
-    {
-        return outcomeManager.GetResult();
     }
 }
