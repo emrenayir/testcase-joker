@@ -1,32 +1,35 @@
 using UnityEngine;
 
-public class HighLowBet : BetButton
+namespace Bet
 {
-    [SerializeField] private bool isHigh;
-    
-    public override BetType GetBetType()
+    public class HighLowBet : BetButton
     {
-        return BetType.HighLow;
-    }
+        [SerializeField] private bool isHigh;
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 18; // High/Low bet covers 18 numbers
-    }
-    
-    public override bool IsWinner(int winningNumber)
-    {
-        if (winningNumber == 0)
+        public override BetType GetBetType()
         {
-            return false; // Zero is neither high nor low
+            return BetType.HighLow;
         }
-        
-        bool numberIsHigh = winningNumber >= 19 && winningNumber <= 36;
-        return isHigh == numberIsHigh;
-    }
     
-    public override int CalculatePayout(int betAmount)
-    {
-        return (int)(betAmount * GetPayout());
+        public override int GetCoveredNumbersCount()
+        {
+            return 18; // High/Low bet covers 18 numbers
+        }
+    
+        public override bool IsWinner(int winningNumber)
+        {
+            if (winningNumber == 0)
+            {
+                return false; // Zero is neither high nor low
+            }
+        
+            bool numberIsHigh = winningNumber >= 19 && winningNumber <= 36;
+            return isHigh == numberIsHigh;
+        }
+    
+        public override int CalculatePayout(int betAmount)
+        {
+            return (int)(betAmount * GetPayout());
+        }
     }
 } 

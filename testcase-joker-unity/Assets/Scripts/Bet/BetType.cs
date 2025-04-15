@@ -1,13 +1,16 @@
-public enum BetType
+namespace Bet
 {
-    Straight,
-    Split,
-    Street,
-    Corner,
-    SixLine,
-    RedBlack,
-    EvenOdd,
-    HighLow,
-    Column,
-    Dozen
+    public enum BetType
+    {
+        Straight,
+        Split,
+        Street,
+        Corner,
+        SixLine,
+        RedBlack,
+        EvenOdd,
+        HighLow,
+        Column,
+        Dozen
+    }
 }

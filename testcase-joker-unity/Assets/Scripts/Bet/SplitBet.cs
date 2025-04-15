@@ -1,29 +1,32 @@
 using UnityEngine;
 
-public class SplitBet : BetButton
+namespace Bet
 {
-    [SerializeField] private int firstNumber;
-    private int[] numbers = new int[2];
-    
-    protected override void Start()
+    public class SplitBet : BetButton
     {
-        base.Start();
-        numbers[0] = firstNumber;
-        numbers[1] = firstNumber + 3;
-    }
+        [SerializeField] private int firstNumber;
+        private int[] numbers = new int[2];
     
-    public override BetType GetBetType()
-    {
-        return BetType.Split;
-    }
+        protected override void Start()
+        {
+            base.Start();
+            numbers[0] = firstNumber;
+            numbers[1] = firstNumber + 3;
+        }
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 2; // Split bet covers 2 numbers
-    }
+        public override BetType GetBetType()
+        {
+            return BetType.Split;
+        }
     
-    public override bool IsWinner(int winningNumber)
-    {
-        return System.Array.IndexOf(numbers, winningNumber) != -1;
+        public override int GetCoveredNumbersCount()
+        {
+            return 2; // Split bet covers 2 numbers
+        }
+    
+        public override bool IsWinner(int winningNumber)
+        {
+            return System.Array.IndexOf(numbers, winningNumber) != -1;
+        }
     }
 } 

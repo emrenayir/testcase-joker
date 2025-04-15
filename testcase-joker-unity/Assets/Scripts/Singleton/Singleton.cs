@@ -1,54 +1,56 @@
 using UnityEngine;
 
-/// <summary>
-/// Generic singleton implementation for MonoBehaviours.
-/// Inherit from this class to make your MonoBehaviour a singleton.
-/// </summary>
-/// <typeparam name="T">The type of the singleton class</typeparam>
-public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
+namespace Singleton
 {
-    // The static instance of the singleton
-    private static T _instance;
-    
     /// <summary>
-    /// Global access point to the singleton instance
+    /// Generic singleton implementation for MonoBehaviours.
+    /// Inherit from this class to make your MonoBehaviour a singleton.
     /// </summary>
-    public static T Instance
+    /// <typeparam name="T">The type of the singleton class</typeparam>
+    public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        get
+        // The static instance of the singleton
+        private static T _instance;
+    
+        /// <summary>
+        /// Global access point to the singleton instance
+        /// </summary>
+        public static T Instance
         {
-            // Check if instance exists
-            if (_instance == null)
+            get
             {
-                // Search for existing instance in scene
-                _instance = FindObjectOfType<T>();
-                
-                // If no instance exists, create a new GameObject with the component
+                // Check if instance exists
                 if (_instance == null)
                 {
-                    GameObject singletonObject = new GameObject();
-                    _instance = singletonObject.AddComponent<T>();
-                    singletonObject.name = $"{typeof(T)} (Singleton)";
+                    // Search for existing instance in scene
+                    _instance = FindObjectOfType<T>();
+                
+                    // If no instance exists, create a new GameObject with the component
+                    if (_instance == null)
+                    {
+                        GameObject singletonObject = new GameObject();
+                        _instance = singletonObject.AddComponent<T>();
+                        singletonObject.name = $"{typeof(T)} (Singleton)";
+                    }
                 }
-            }
             
-            return _instance;
+                return _instance;
+            }
         }
-    }
     
-    /// <summary>
-    /// Initialize the singleton instance
-    /// </summary>
-    protected virtual void Awake()
-    {
-        if (_instance == null)
+        /// <summary>
+        /// Initialize the singleton instance
+        /// </summary>
+        protected virtual void Awake()
         {
-            _instance = this as T;
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (_instance != this)
-        {
-            Destroy(gameObject);
+            if (_instance == null)
+            {
+                _instance = this as T;
+            }
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

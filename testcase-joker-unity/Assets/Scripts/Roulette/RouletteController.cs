@@ -1,5 +1,7 @@
 using System;
+using EventBus;
 using Game;
+using Roulette;
 using UnityEngine;
 
 /// <summary>
@@ -38,8 +40,6 @@ public class RouletteController : MonoBehaviour
     public void StartRoulette()
     {
         if (isSpinning) return;
-        
-        EventManager.Instance.Raise(new RouletteStartedEvent());
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
         ball.StartRolling(targetNumber);

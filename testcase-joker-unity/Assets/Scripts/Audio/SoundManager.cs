@@ -1,46 +1,56 @@
 using System.Collections.Generic;
+using Singleton;
 using UnityEngine;
 
-/// <summary>
-/// Simple sound manager that plays audio clips directly.
-/// </summary>
-public class SoundManager : Singleton<SoundManager>
+namespace Audio
 {
-    [SerializeField] private AudioSource sfxSource;
-    
-    [Header("Audio Clips")]
-    [SerializeField] private List<AudioClip> audioClips;
-    
-    private Dictionary<string, AudioClip> soundDictionary = new Dictionary<string, AudioClip>();
-
-    private void InitializeSounds()
+    /// <summary>
+    /// Simple sound manager that plays audio clips directly.
+    /// </summary>
+    public class SoundManager : Singleton<SoundManager>
     {
-        foreach (var clip in audioClips)
+        [SerializeField] private AudioSource sfxSource;
+    
+        [Header("Audio Clips")]
+        [SerializeField] private List<AudioClip> audioClips;
+    
+        private Dictionary<string, AudioClip> soundDictionary = new Dictionary<string, AudioClip>();
+
+        protected override void Awake()
         {
-            if (clip != null)
+            base.Awake();
+            InitializeSounds();
+        }
+
+        private void InitializeSounds()
+        {
+            foreach (var clip in audioClips)
             {
-                soundDictionary[clip.name] = clip;
+                if (clip != null)
+                {
+                    soundDictionary[clip.name] = clip;
+                }
             }
         }
-    }
 
-    public void PlaySound(string soundName, float volume = 1f, float pitch = 1f)
-    {
-        if (soundDictionary.TryGetValue(soundName, out AudioClip clip))
+        public void PlaySound(string soundName, float volume = 1f, float pitch = 1f)
         {
-            sfxSource.pitch = pitch;
-            sfxSource.volume = volume;
-            sfxSource.clip = clip;
-            sfxSource.Play();
+            if (soundDictionary.TryGetValue(soundName, out AudioClip clip))
+            {
+                sfxSource.pitch = pitch;
+                sfxSource.volume = volume;
+                sfxSource.clip = clip;
+                sfxSource.Play();
+            }
+            else
+            {
+                Debug.LogWarning($"Sound {soundName} not found!");
+            }
         }
-        else
-        {
-            Debug.LogWarning($"Sound {soundName} not found!");
-        }
-    }
 
-    public void StopSound()
-    {
-        sfxSource.Stop();
+        public void StopSound()
+        {
+            sfxSource.Stop();
+        }
     }
 } 

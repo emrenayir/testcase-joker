@@ -1,33 +1,36 @@
 using UnityEngine;
 
-public class SixLineBet : BetButton
+namespace Bet
 {
-    [SerializeField] private int startNumber; // The first number in the six line
-    
-    private int[] numbers = new int[6];
-    
-    protected override void Start()
+    public class SixLineBet : BetButton
     {
-        base.Start();
-        // Six line bet covers two adjacent rows of numbers
-        for (int i = 0; i < 6; i++)
+        [SerializeField] private int startNumber; // The first number in the six line
+    
+        private int[] numbers = new int[6];
+    
+        protected override void Start()
         {
-            numbers[i] = startNumber + i;
+            base.Start();
+            // Six line bet covers two adjacent rows of numbers
+            for (int i = 0; i < 6; i++)
+            {
+                numbers[i] = startNumber + i;
+            }
         }
-    }
     
-    public override BetType GetBetType()
-    {
-        return BetType.SixLine;
-    }
+        public override BetType GetBetType()
+        {
+            return BetType.SixLine;
+        }
     
-    public override int GetCoveredNumbersCount()
-    {
-        return 6; // Six line bet covers 6 numbers
-    }
+        public override int GetCoveredNumbersCount()
+        {
+            return 6; // Six line bet covers 6 numbers
+        }
     
-    public override bool IsWinner(int winningNumber)
-    {
-        return System.Array.IndexOf(numbers, winningNumber) != -1;
+        public override bool IsWinner(int winningNumber)
+        {
+            return System.Array.IndexOf(numbers, winningNumber) != -1;
+        }
     }
 } 

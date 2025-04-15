@@ -1,7 +1,10 @@
-public interface IBetButton
+namespace Bet
 {
-    void OnClick();
-    void ShowWinningStatus(bool isWinning);
-    BetType GetBetType();
-    float GetPayout();
+    public interface IBetButton
+    {
+        void OnClick();
+        void ShowWinningStatus(bool isWinning);
+        BetType GetBetType();
+        float GetPayout();
+    }
 }
