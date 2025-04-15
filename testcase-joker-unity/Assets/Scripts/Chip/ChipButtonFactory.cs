@@ -14,7 +14,7 @@ public class ChipButtonFactory : MonoBehaviour
     [SerializeField] private GameObject chipButtonPrefab;
 
     [Tooltip("ScriptableObjects for different chip values")]
-    [SerializeField] private List<ChipSO> chipSOs;
+    [SerializeField] private List<ChipSO> chipSOList;
 
     /// <summary>
     /// Creates chip buttons for the provided chip selection controller
@@ -79,6 +79,6 @@ public class ChipButtonFactory : MonoBehaviour
     /// <returns>The ChipSO for the specified value.</returns>
     private ChipSO FindChipSO(ChipValue value)
     {
-        return chipSOs.Find(chipSO => chipSO.value == value);
+        return chipSOList.Find(chipSO => chipSO.value == value);
     }
 }

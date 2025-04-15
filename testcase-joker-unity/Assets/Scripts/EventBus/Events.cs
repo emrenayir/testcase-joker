@@ -17,9 +17,6 @@ public struct RouletteFinishedEvent : IEvent{
     public int WinningNumber;
 }
 
-public struct OnOutcomeSelectedEvent : IEvent{
-    public int Outcome;
-}
 
 //Bet events
 public struct BetProcessingFinishedEvent : IEvent{
@@ -91,11 +88,6 @@ public struct OnTotalSpinsChangedEvent : IEvent{}
 public struct OnTotalWinsChangedEvent : IEvent
 {
     public int TotalWinsChangeAmount;
-}
-
-public struct OnTotalProfitChangedEvent : IEvent
-{
-    public int ProfitChangeAmount;
 }
 
 public struct OnCurrentRoundProfitChangedEvent : IEvent 

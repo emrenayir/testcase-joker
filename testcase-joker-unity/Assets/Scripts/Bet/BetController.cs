@@ -18,11 +18,6 @@ public class BetController : MonoBehaviour
     private List<BetButton> activeBets = new List<BetButton>();
     private int winningNumber;
 
-    private EventBinding<ResetBetButtonEvent> resetBetBinding;
-    private EventBinding<GameStateChangeEvent> gameStateBinding;
-    private EventBinding<RouletteFinishedEvent> rouletteFinishedBinding;
-    private EventBinding<LoadSavedBetsEvent> loadSavedBetsBinding;
-
     void Awake()
     {
         foreach (var betButton in betButtons)
@@ -30,17 +25,10 @@ public class BetController : MonoBehaviour
             betButton.SetBetButton(chipSelectionController, this);
         }
 
-        resetBetBinding = new EventBinding<ResetBetButtonEvent>(ClearAllBets);
-        EventBus<ResetBetButtonEvent>.Register(resetBetBinding);
-
-        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
-        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
-
-        rouletteFinishedBinding = new EventBinding<RouletteFinishedEvent>(OnRouletteFinished);
-        EventBus<RouletteFinishedEvent>.Register(rouletteFinishedBinding);
-        
-        loadSavedBetsBinding = new EventBinding<LoadSavedBetsEvent>(OnLoadSavedBets);
-        EventBus<LoadSavedBetsEvent>.Register(loadSavedBetsBinding);
+        EventManager.Instance.RegisterEvent<ResetBetButtonEvent>(ClearAllBets);
+        EventManager.Instance.RegisterEvent<GameStateChangeEvent>(OnGameStateChanged);
+        EventManager.Instance.RegisterEvent<RouletteFinishedEvent>(OnRouletteFinished);
+        EventManager.Instance.RegisterEvent<LoadSavedBetsEvent>(OnLoadSavedBets);
     }
 
     private void OnRouletteFinished(RouletteFinishedEvent @event)
@@ -99,7 +87,7 @@ public class BetController : MonoBehaviour
     {
         if (activeBets.Count > 0)
         {
-            EventBus<SaveBetsEvent>.Raise(new SaveBetsEvent { ActiveBets = activeBets });
+            EventManager.Instance.Raise(new SaveBetsEvent { ActiveBets = activeBets });
         }
     }
 
@@ -111,7 +99,7 @@ public class BetController : MonoBehaviour
     private void HandleBet(BetButton betButton)
     {
         int chipValue = ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue);
-        EventBus<PlaceBetEvent>.Raise(new PlaceBetEvent { ChipValue = chipValue });
+        EventManager.Instance.Raise(new PlaceBetEvent { ChipValue = chipValue });
 
         //Check if the bet is already in the list
         if (activeBets.Contains(betButton))
@@ -149,12 +137,12 @@ public class BetController : MonoBehaviour
             }
         }
 
-        EventBus<ProcessPaymentEvent>.Raise(new ProcessPaymentEvent { Payment = totalWinnings, LostBets = lostBets });
+        EventManager.Instance.Raise(new ProcessPaymentEvent { Payment = totalWinnings, LostBets = lostBets });
 
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
 
-        EventBus<BetProcessingFinishedEvent>.Raise(new BetProcessingFinishedEvent { IsWinner = totalWinnings - lostBets > 0 });
+        EventManager.Instance.Raise(new BetProcessingFinishedEvent { IsWinner = totalWinnings - lostBets > 0 });
         
         
         ClearAllBets();
@@ -171,7 +159,7 @@ public class BetController : MonoBehaviour
         }
         activeBets.Clear();
         
-        EventBus<ClearSavedBetsEvent>.Raise(new ClearSavedBetsEvent());
+        EventManager.Instance.Raise(new ClearSavedBetsEvent());
     }
 
 

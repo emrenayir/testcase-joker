@@ -23,49 +23,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI totalWinsText;
     [SerializeField] private TextMeshProUGUI totalProfitText;
 
-
-    //Event binding for game state changes
-    private EventBinding<GameStateChangeEvent> gameStateBinding;
-    private EventBinding<UpdateStatsEvent> updateStatsBinding;
-    private EventBinding<OnMoneyChangedEvent> onMoneyChangedBinding;
-    private EventBinding<OnBetChangedEvent> onBetChangedBinding;
-    private EventBinding<OnPaymentChangedEvent> onPaymentChangedBinding;
-
-
     private void Awake()
     {
-        //GameState 
-        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
-        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
-
-        //UpdateStats
-        updateStatsBinding = new EventBinding<UpdateStatsEvent>(UpdateStatsDisplay);
-        EventBus<UpdateStatsEvent>.Register(updateStatsBinding);
-
-        Debug.Log("UIManager Awake");
-        //Event binding for user money changes
-        onMoneyChangedBinding = new EventBinding<OnMoneyChangedEvent>(OnUserMoneyChanged);
-        EventBus<OnMoneyChangedEvent>.Register(onMoneyChangedBinding);
-
-        onBetChangedBinding = new EventBinding<OnBetChangedEvent>(OnBetAmountChanged);
-        EventBus<OnBetChangedEvent>.Register(onBetChangedBinding);
-
-        onPaymentChangedBinding = new EventBinding<OnPaymentChangedEvent>(OnLastRoundEarningsChanged);
-        EventBus<OnPaymentChangedEvent>.Register(onPaymentChangedBinding);
-
-
-        
-
-    }
-
-    private void OnDestroy()
-    {
-        EventBus<GameStateChangeEvent>.UnRegister(gameStateBinding);
-        EventBus<UpdateStatsEvent>.UnRegister(updateStatsBinding);
-        EventBus<OnMoneyChangedEvent>.UnRegister(onMoneyChangedBinding);
-        EventBus<OnBetChangedEvent>.UnRegister(onBetChangedBinding);
-        EventBus<OnPaymentChangedEvent>.UnRegister(onPaymentChangedBinding);
-
+        EventManager.Instance.RegisterEvent<GameStateChangeEvent>(OnGameStateChanged);
+        EventManager.Instance.RegisterEvent<UpdateStatsEvent>(UpdateStatsDisplay);
+        EventManager.Instance.RegisterEvent<OnMoneyChangedEvent>(OnUserMoneyChanged);
+        EventManager.Instance.RegisterEvent<OnBetChangedEvent>(OnBetAmountChanged);
+        EventManager.Instance.RegisterEvent<OnPaymentChangedEvent>(OnLastRoundEarningsChanged);
     }
 
     private void OnGameStateChanged(GameStateChangeEvent @event)
@@ -74,14 +38,25 @@ public class UIManager : MonoBehaviour
         {
             case GameState.InBet:
                 SetButtonActive(true);
+                SetTotalProfit();
                 break;
-                
+
             case GameState.Running:
                 SetButtonActive(false);
                 break;
-                
+
             case GameState.Finish:
                 break;
+        }
+    }
+
+    private void SetTotalProfit()
+    {
+        var value = int.Parse(userMoneyText.text) - 1000;
+
+        if (value >= 0)
+        {
+            totalProfitText.text = value.ToString();
         }
     }
 
@@ -92,7 +67,7 @@ public class UIManager : MonoBehaviour
 
     public void OnAddFreeChipsClicked()
     {
-        EventBus<AddFreeChipsButtonClickedEvent>.Raise(new AddFreeChipsButtonClickedEvent());
+        EventManager.Instance.Raise(new AddFreeChipsButtonClickedEvent());
     }
 
 
@@ -108,12 +83,12 @@ public class UIManager : MonoBehaviour
 
     public void OnBetPlacementConfirmed()
     {
-        EventBus<BetPlacementConfirmedButtonEvent>.Raise(new BetPlacementConfirmedButtonEvent());
+        EventManager.Instance.Raise(new BetPlacementConfirmedButtonEvent());
     }
 
     public void OnResetBetClicked()
     {
-        EventBus<ResetBetButtonEvent>.Raise(new ResetBetButtonEvent());
+        EventManager.Instance.Raise(new ResetBetButtonEvent());
     }
 
     // Methods to control button visibility
@@ -137,6 +112,5 @@ public class UIManager : MonoBehaviour
     {
         totalSpinsText.text = @event.PlayerStatsData.TotalSpins.ToString();
         totalWinsText.text = @event.PlayerStatsData.TotalWins.ToString();
-        totalProfitText.text = @event.PlayerStatsData.TotalProfit.ToString();
     }
 }

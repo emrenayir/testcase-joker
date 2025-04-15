@@ -4,10 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Simple sound manager that plays audio clips directly.
 /// </summary>
-public class SoundManager : MonoBehaviour
+public class SoundManager : Singleton<SoundManager>
 {
-    public static SoundManager Instance { get; private set; }
-
     [SerializeField] private AudioSource sfxSource;
     
     [Header("Audio Clips")]
@@ -15,20 +13,6 @@ public class SoundManager : MonoBehaviour
     
     private Dictionary<string, AudioClip> soundDictionary = new Dictionary<string, AudioClip>();
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            InitializeSounds();
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-    
     private void InitializeSounds()
     {
         foreach (var clip in audioClips)

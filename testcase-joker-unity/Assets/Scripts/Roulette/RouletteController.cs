@@ -13,22 +13,10 @@ public class RouletteController : MonoBehaviour
     
     private bool isSpinning = false;
 
-    private EventBinding<RouletteFinishedEvent> rouletteFinishedBinding;
-
-    private EventBinding<GameStateChangeEvent> gameStateBinding;
     private void Awake() 
     {
-        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
-        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
-
-        rouletteFinishedBinding = new EventBinding<RouletteFinishedEvent>(OnRouletteFinished);
-        EventBus<RouletteFinishedEvent>.Register(rouletteFinishedBinding);
-    }
-
-    private void OnDestroy()
-    {
-        EventBus<GameStateChangeEvent>.UnRegister(gameStateBinding);
-        EventBus<RouletteFinishedEvent>.UnRegister(rouletteFinishedBinding);
+        EventManager.Instance.RegisterEvent<GameStateChangeEvent>(OnGameStateChanged);
+        EventManager.Instance.RegisterEvent<RouletteFinishedEvent>(OnRouletteFinished);
     }
 
     private void OnRouletteFinished(RouletteFinishedEvent @event)
@@ -51,8 +39,7 @@ public class RouletteController : MonoBehaviour
     {
         if (isSpinning) return;
         
-
-        EventBus<RouletteStartedEvent>.Raise(new RouletteStartedEvent());
+        EventManager.Instance.Raise(new RouletteStartedEvent());
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
         ball.StartRolling(targetNumber);

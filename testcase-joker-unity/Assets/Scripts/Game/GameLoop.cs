@@ -13,22 +13,10 @@ public class GameLoop : MonoBehaviour
 
     private GameState currentPhase;
 
-    private EventBinding<BetPlacementConfirmedButtonEvent> betPlacementConfirmedBinding;
-    private EventBinding<BetProcessingFinishedEvent> betProcessingFinishedBinding;
-
     void Awake()
     {
-        betPlacementConfirmedBinding = new EventBinding<BetPlacementConfirmedButtonEvent>(OnBetPlacementConfirmed);
-        EventBus<BetPlacementConfirmedButtonEvent>.Register(betPlacementConfirmedBinding);
-
-
-        betProcessingFinishedBinding = new EventBinding<BetProcessingFinishedEvent>(OnBetProcessingFinished);
-        EventBus<BetProcessingFinishedEvent>.Register(betProcessingFinishedBinding);
-    }
-    void OnDestroy()
-    {
-        EventBus<BetPlacementConfirmedButtonEvent>.UnRegister(betPlacementConfirmedBinding);
-        EventBus<BetProcessingFinishedEvent>.UnRegister(betProcessingFinishedBinding);
+        EventManager.Instance.RegisterEvent<BetPlacementConfirmedButtonEvent>(OnBetPlacementConfirmed);
+        EventManager.Instance.RegisterEvent<BetProcessingFinishedEvent>(OnBetProcessingFinished);
     }
 
     void Start()
@@ -43,7 +31,7 @@ public class GameLoop : MonoBehaviour
         currentPhase = newPhase;
 
         // Raise event for state change
-        EventBus<GameStateChangeEvent>.Raise(new GameStateChangeEvent { NewState = newPhase });
+        EventManager.Instance.Raise(new GameStateChangeEvent { NewState = newPhase });
 
         switch (currentPhase)
         {
@@ -57,14 +45,14 @@ public class GameLoop : MonoBehaviour
     }
     private void EnterRunningPhase()
     {
-        EventBus<OnTotalSpinsChangedEvent>.Raise(new OnTotalSpinsChangedEvent { });
+        EventManager.Instance.Raise(new OnTotalSpinsChangedEvent { });
     }
 
     private void EnterFinishPhase(bool isWinner)
     {
         if (isWinner)
         {
-            EventBus<OnTotalWinsChangedEvent>.Raise(new OnTotalWinsChangedEvent { TotalWinsChangeAmount = 1 });
+            EventManager.Instance.Raise(new OnTotalWinsChangedEvent { TotalWinsChangeAmount = 1 });
             winParticles.Play();
             SoundManager.Instance.PlaySound("Win");
         }
