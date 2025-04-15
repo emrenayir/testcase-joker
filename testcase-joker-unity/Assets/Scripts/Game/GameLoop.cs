@@ -23,7 +23,7 @@ namespace Game
 
         void Start()
         {
-            var playerSave = PlayerSave.Instance; //TODO: this is probably not a good way to do this
+            var _ = PlayerSave.Instance; //TODO: this is probably not a good way to run constructor
 
             SetPhase(GameState.InBet);
         }

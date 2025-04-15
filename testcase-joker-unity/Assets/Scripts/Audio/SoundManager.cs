@@ -47,10 +47,5 @@ namespace Audio
                 Debug.LogWarning($"Sound {soundName} not found!");
             }
         }
-
-        public void StopSound()
-        {
-            sfxSource.Stop();
-        }
     }
 } 
