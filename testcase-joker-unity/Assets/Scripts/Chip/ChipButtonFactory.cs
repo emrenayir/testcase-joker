@@ -8,10 +8,10 @@ using static ChipHelper;
 public class ChipButtonFactory : MonoBehaviour
 {
     [Tooltip("Locations where chip buttons will be placed")]
-    public List<Transform> chipButtonLocations;
+    [SerializeField] private List<Transform> chipButtonLocations;
     
     [Tooltip("Prefab for chip buttons")]
-    public GameObject chipButtonPrefab;
+    [SerializeField] private GameObject chipButtonPrefab;
 
     [Tooltip("ScriptableObjects for different chip values")]
     [SerializeField] private List<ChipSO> chipSOs;
@@ -41,7 +41,7 @@ public class ChipButtonFactory : MonoBehaviour
     /// <param name="value">The value of the chip button.</param>
     /// <param name="chipSelectionController">The controller that manages chip selection.</param>
     /// <returns>The created chip button GameObject.</returns>
-    public GameObject CreateChipButton(ChipValue value, ChipSelectionController chipSelectionController)
+    private GameObject CreateChipButton(ChipValue value, ChipSelectionController chipSelectionController)
     {
         // Instantiate the chip button prefab
         GameObject chipButton = Instantiate(chipButtonPrefab);

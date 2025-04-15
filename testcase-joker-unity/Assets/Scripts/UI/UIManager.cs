@@ -103,7 +103,6 @@ public class UIManager : MonoBehaviour
 
     private void OnUserMoneyChanged(OnMoneyChangedEvent @event)
     {
-        Debug.Log("OnUserMoneyChanged: " + @event.Money);
         userMoneyText.text = @event.Money.ToString();
     }
 

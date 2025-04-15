@@ -5,7 +5,7 @@ using UnityEngine;
 /// It is responsible for selecting the target number and handling the random number generation.
 /// -1 is used to indicate that the number is not yet selected.
 /// </summary>
-public class RouletteOutcomeManager : MonoBehaviour, IRouletteOutcomeProvider
+public class RouletteOutcomeManager : MonoBehaviour
 {
     [SerializeField] private int selectedNumber = -1; // -1 means random
 

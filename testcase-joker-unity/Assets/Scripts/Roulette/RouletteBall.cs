@@ -13,7 +13,7 @@ using UnityEngine;
 /// The ball will bounce off the slot if it is not the target slot.
 /// The ball will settle on the target slot.
 /// </summary>
-public class RouletteBall : MonoBehaviour, IRouletteBall
+public class RouletteBall : MonoBehaviour
 {
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform wheelCenter;
@@ -24,8 +24,8 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
     [SerializeField] private float targetApproachThreshold = 10f;
     [SerializeField] private float maxBounceHeight = 0.15f;
 
-    private RouletteController rouletteController;
-    private int targetNumber = -1;
+    private int winningNumberIndex = -1;
+    private int winningNumber = -1;
     private bool isRolling = false;
     private Vector3 targetPosition;
     private float targetAngle;
@@ -38,11 +38,6 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         public float duration;
     }
 
-    void Awake()
-    {
-        rouletteController = GetComponentInParent<RouletteController>();
-    }
-
     /// <summary>
     /// Starts the rolling of the ball.
     /// </summary>
@@ -50,6 +45,7 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
     public void StartRolling(int targetNum)
     {
         if (isRolling) return;
+        winningNumber = targetNum;
 
         if (numberSlotPositions == null || numberSlotPositions.Length == 0)
         {
@@ -57,32 +53,32 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
             return;
         }
 
-        targetNumber = FindTargetSlotIndex(targetNum);
-        if (targetNumber == -1) return;
+        winningNumberIndex = FindTargetSlotIndex();
+        if (winningNumberIndex == -1) return;
 
         StartCoroutine(RollBallCoroutine());
-        SoundManager.Instance.PlaySFX("Spin");
+        SoundManager.Instance.PlaySound("Spin");
     }
 
     // TODO: Use linq to find the index of the target slot
-    private int FindTargetSlotIndex(int targetNum)
+    private int FindTargetSlotIndex()
     {
         for (int i = 0; i < numberSlotPositions.Length; i++)
         {
-            if (numberSlotPositions[i] != null && numberSlotPositions[i].SlotNumber == targetNum)
+            if (numberSlotPositions[i] != null && numberSlotPositions[i].SlotNumber == winningNumber)
             {
                 return i;
             }
         }
 
-        Debug.LogError("Could not find slot with number: " + targetNum);
+        Debug.LogError("Could not find slot with number: " + winningNumber);
         return -1;
     }
 
 
     private void UpdateTargetPosition()
     {
-        targetPosition = numberSlotPositions[targetNumber].transform.position;
+        targetPosition = numberSlotPositions[winningNumberIndex].transform.position;
     }
 
     private IEnumerator RollBallCoroutine()
@@ -93,14 +89,7 @@ public class RouletteBall : MonoBehaviour, IRouletteBall
         yield return ApproachTargetWithBounces();
         yield return SettleOnTarget();
         isRolling = false;
-        if (rouletteController != null)
-        {
-            rouletteController.InvokeSpinCompleted();
-        }
-        else
-        {
-            Debug.LogError("RouletteController not found");
-        }
+        EventBus<RouletteFinishedEvent>.Raise(new RouletteFinishedEvent { WinningNumber = winningNumber });
     }
 
     private void PlaceBallAtRandomPosition()

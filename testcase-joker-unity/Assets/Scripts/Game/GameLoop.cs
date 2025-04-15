@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Game;
+using System;
 
 /// <summary>
 /// This is the main class that controls the game loop.
@@ -8,140 +9,80 @@ using Game;
 /// </summary>
 public class GameLoop : MonoBehaviour
 {
-    [SerializeField] private RouletteController rouletteController; //TODO: remove this dependency
-    [SerializeField] private BetController betController; //TODO: remove this dependency
-    [SerializeField] private ParticleSystem winParticles; //TODO: remove this dependency
+    [SerializeField] private ParticleSystem winParticles;
 
     private GameState currentPhase;
 
     private EventBinding<BetPlacementConfirmedButtonEvent> betPlacementConfirmedBinding;
-
+    private EventBinding<BetProcessingFinishedEvent> betProcessingFinishedBinding;
 
     void Awake()
     {
         betPlacementConfirmedBinding = new EventBinding<BetPlacementConfirmedButtonEvent>(OnBetPlacementConfirmed);
         EventBus<BetPlacementConfirmedButtonEvent>.Register(betPlacementConfirmedBinding);
-    }
 
+
+        betProcessingFinishedBinding = new EventBinding<BetProcessingFinishedEvent>(OnBetProcessingFinished);
+        EventBus<BetProcessingFinishedEvent>.Register(betProcessingFinishedBinding);
+    }
     void OnDestroy()
     {
         EventBus<BetPlacementConfirmedButtonEvent>.UnRegister(betPlacementConfirmedBinding);
+        EventBus<BetProcessingFinishedEvent>.UnRegister(betProcessingFinishedBinding);
     }
 
     void Start()
     {
-        //Init player save TODO: Move to some other class idk where
-        var playerSave = PlayerSave.Instance;
+        var playerSave = PlayerSave.Instance; //TODO: this is probably not a good way to do this
+
         SetPhase(GameState.InBet);
     }
 
-    private void SetPhase(GameState newPhase)
+    private void SetPhase(GameState newPhase, bool isWinner = false)
     {
         currentPhase = newPhase;
-        
+
         // Raise event for state change
         EventBus<GameStateChangeEvent>.Raise(new GameStateChangeEvent { NewState = newPhase });
-        
+
         switch (currentPhase)
         {
-            case GameState.InBet:
-                EnterChipSelectionPhase();
-                break;
             case GameState.Running:
-                EnterRouletteSpinningPhase();
+                EnterRunningPhase();
                 break;
             case GameState.Finish:
-                EnterResultsPhase();
+                EnterFinishPhase(isWinner);
                 break;
         }
     }
-
-    private void EnterChipSelectionPhase()
+    private void EnterRunningPhase()
     {
-        betController.IsBettingEnabled = true;
+        EventBus<OnTotalSpinsChangedEvent>.Raise(new OnTotalSpinsChangedEvent { });
     }
 
-    private void EnterRouletteSpinningPhase()
+    private void EnterFinishPhase(bool isWinner)
     {
-         //TODO: Move to some other class its not the game loop responsibility
-        EventBus<OnCurrentRoundProfitChangedEvent>.Raise(new OnCurrentRoundProfitChangedEvent { CurrentRoundProfitChangeAmount = -PlayerSave.Instance.GetCurrentBet() });
-        EventBus<OnTotalSpinsChangedEvent>.Raise(new OnTotalSpinsChangedEvent {});
-
-
-        // Start the roulette spinning and listen for completion
-        rouletteController.StartRoulette(); //Roullette will listen for state change and call StartRoulette()
-        
-        // Start a coroutine to check when the roulette stops spinning //instead of waiting for the coroutine we should listen for the event from roulette controller
-        StartCoroutine(WaitForRouletteToComplete());
-    }
-
-    private IEnumerator WaitForRouletteToComplete()
-    {
-        // Wait until roulette is no longer spinning
-        // Use a reasonable delay to check periodically
-        yield return new WaitForSeconds(8f); // Adjust as needed
-        
-        
-        // Move to results phase
-        SetPhase(GameState.Finish);
-    }
-
-    private void EnterResultsPhase()
-    {
-        // Process the bet results is not the game loop responsibility
-        StartCoroutine(ProcessResults());
-    }
-
-    //TODO: Move to some other class its not the game loop responsibility
-    private IEnumerator ProcessResults()
-    {
-        // Store initial money for win/loss calculation
-        int initialMoney = PlayerSave.Instance.GetCurrentMoney();
-        
-        // Process the bet based on the winning number
-        betController.ProcessResult(rouletteController.GetResult());
-        
-        // Calculate profit/loss for this round
-        int finalMoney = PlayerSave.Instance.GetCurrentMoney();
-        int winnings = finalMoney - initialMoney;
-
-
-
-        EventBus<OnCurrentRoundProfitChangedEvent>.Raise(new OnCurrentRoundProfitChangedEvent { CurrentRoundProfitChangeAmount = winnings });
-        
-        // Update stats
-        EventBus<OnTotalProfitChangedEvent>.Raise(new OnTotalProfitChangedEvent { ProfitChangeAmount = winnings });
-        
-        // Check if player won this round
-        if (winnings > 0)
+        if (isWinner)
         {
             EventBus<OnTotalWinsChangedEvent>.Raise(new OnTotalWinsChangedEvent { TotalWinsChangeAmount = 1 });
-
-            SoundManager.Instance.PlaySFX("Win");
             winParticles.Play();
-        }else
-        {
-            SoundManager.Instance.PlaySFX("Error");
+            SoundManager.Instance.PlaySound("Win");
         }
-
+        else
+        {
+            SoundManager.Instance.PlaySound("Error");
+        }
         
-        // Wait for a moment before starting a new round
-        yield return new WaitForSeconds(3f);
-        
-        
-        // Clear previous bets
-        betController.ClearAllBets();
-        
-        // Return to chip selection phase
         SetPhase(GameState.InBet);
     }
 
-    // Button event handlers
+    private void OnBetProcessingFinished(BetProcessingFinishedEvent @event)
+    {
+        SetPhase(GameState.Finish, @event.IsWinner);
+    }
     private void OnBetPlacementConfirmed()
     {
         // Player has confirmed their chip selection, move to next phase
         SetPhase(GameState.Running);
     }
-
-    
 }

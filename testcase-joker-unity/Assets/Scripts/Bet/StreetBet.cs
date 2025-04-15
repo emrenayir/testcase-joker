@@ -9,9 +9,10 @@ public class StreetBet : BetButton
     protected override void Start()
     {
         base.Start();
-        numbers[0] = startNumber;
-        numbers[1] = startNumber + 1;
-        numbers[2] = startNumber + 2;
+        for (int i = 0; i < 3; i++)
+        {
+            numbers[i] = startNumber + i;
+        }
     }
     
     public override BetType GetBetType()

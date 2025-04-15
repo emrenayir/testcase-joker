@@ -21,6 +21,8 @@ public class PlayerSave
     private EventBinding<OnTotalWinsChangedEvent> onTotalWinsChangedBinding;
     private EventBinding<OnTotalProfitChangedEvent> onTotalProfitChangedBinding;
     private EventBinding<OnCurrentRoundProfitChangedEvent> onCurrentRoundProfitChangedBinding;
+    private EventBinding<ResetBetButtonEvent> resetBetBinding;
+    private EventBinding<AddFreeChipsButtonClickedEvent> addFreeChipsBinding;   
 
     private int totalSpins = 0;
     private int totalWins = 0;
@@ -56,9 +58,7 @@ public class PlayerSave
     // Load player data from PlayerPrefs
     private void LoadPlayerData()
     {
-        Debug.Log("LoadPlayerData");
         userMoney = PlayerPrefs.GetInt(MONEY_KEY, 1000); // Default starting money is 1000
-        Debug.Log("userMoney: " + userMoney);
         currentBet = PlayerPrefs.GetInt(CURRENT_BET_KEY, 0);
         currentPayment = PlayerPrefs.GetInt(LAST_PAYMENT_KEY, 0);
 
@@ -82,7 +82,12 @@ public class PlayerSave
 
         onCurrentRoundProfitChangedBinding = new EventBinding<OnCurrentRoundProfitChangedEvent>(OnCurrentRoundProfitChanged);
         EventBus<OnCurrentRoundProfitChangedEvent>.Register(onCurrentRoundProfitChangedBinding);
-        
+
+        resetBetBinding = new EventBinding<ResetBetButtonEvent>(ResetBet);
+        EventBus<ResetBetButtonEvent>.Register(resetBetBinding);
+
+        addFreeChipsBinding = new EventBinding<AddFreeChipsButtonClickedEvent>(AddFreeChips);
+        EventBus<AddFreeChipsButtonClickedEvent>.Register(addFreeChipsBinding);
 
         
         // Load and notify stats
@@ -156,19 +161,19 @@ public class PlayerSave
         
         PlayerPrefs.SetInt(MONEY_KEY, userMoney);
         PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
-        PlayerPrefs.SetInt(LAST_PAYMENT_KEY, currentPayment);
+        PlayerPrefs.SetInt(LAST_PAYMENT_KEY, payment - lostBets);
         PlayerPrefs.Save();
         
-        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
+        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = payment - lostBets });
         EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
         EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
-        
-        Debug.Log($"Player money updated with payment: {payment}! Current payment set to: {currentPayment}");
+
+        EventBus<OnTotalProfitChangedEvent>.Raise(new OnTotalProfitChangedEvent { ProfitChangeAmount = payment - lostBets  });
     }
     
-    public void AddFreeChips(int amount = 1000)
+    public void AddFreeChips()
     {
-        userMoney += amount;
+        userMoney += 1000;
         PlayerPrefs.SetInt(MONEY_KEY, userMoney);
         PlayerPrefs.Save();
         
@@ -194,7 +199,7 @@ public class PlayerSave
     public int GetCurrentPayment() => currentPayment;
     
     // Setters (for loading saved data)
-    public void SetMoney(int amount)
+    private void SetMoney(int amount)
     {
         userMoney = Mathf.Max(0, amount);
         PlayerPrefs.SetInt(MONEY_KEY, userMoney);
@@ -204,7 +209,7 @@ public class PlayerSave
         Debug.Log($"Player money set to: {userMoney}");
     }
     
-    public void SetCurrentBet(int amount)
+    private void SetCurrentBet(int amount)
     {
         currentBet = Mathf.Max(0, amount);
         PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
@@ -214,7 +219,7 @@ public class PlayerSave
         Debug.Log($"Current bet set to: {currentBet}");
     }
     
-    public void SetCurrentPayment(int amount)
+    private void SetCurrentPayment(int amount)
     {
         currentPayment = amount;
         PlayerPrefs.SetInt(LAST_PAYMENT_KEY, currentPayment);
@@ -223,6 +228,8 @@ public class PlayerSave
         EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
         Debug.Log($"Last round earnings set to: {currentPayment}");
     }
+
+    
     
     // Bet Data Management
     
@@ -325,7 +332,7 @@ public class PlayerSave
     
     // Stats Management
     
-    public void SavePlayerStats(int totalSpins, int totalWins, int totalProfit)
+    private void SavePlayerStats(int totalSpins, int totalWins, int totalProfit)
     {
         PlayerPrefs.SetInt(TOTAL_SPINS_KEY, totalSpins);
         PlayerPrefs.SetInt(TOTAL_WINS_KEY, totalWins);
@@ -365,29 +372,6 @@ public class PlayerSave
         };
     }
     
-    public void ClearPlayerStats()
-    {
-        PlayerPrefs.DeleteKey(TOTAL_SPINS_KEY);
-        PlayerPrefs.DeleteKey(TOTAL_WINS_KEY);
-        PlayerPrefs.DeleteKey(TOTAL_PROFIT_KEY);
-        PlayerPrefs.Save();
-    }
-    
-    public void ClearAllData()
-    {
-        PlayerPrefs.DeleteAll();
-        PlayerPrefs.Save();
-        
-        // Reset current values
-        userMoney = 1000;
-        currentBet = 0;
-        currentPayment = 0;
-        
-        // Update UI
-        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
-        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
-        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
-    }
 }
 
 [Serializable]

@@ -3,18 +3,6 @@
 /// </summary>
 public static class ChipHelper
 {
-    /// <summary>
-    /// Contains possible chip values in the game.
-    /// </summary>
-    public enum ChipValue
-    {
-        One = 1,
-        Five = 5,
-        TwentyFive = 25,
-        Hundred = 100,
-        FiveHundred = 500,
-        Thousand = 1000
-    }
 
     /// <summary>
     /// Returns the value of the chip.
@@ -44,9 +32,8 @@ public static class ChipHelper
             case 1000:
                 return ChipValue.Thousand;
             default:
-                // Default to the smallest chip if value doesn't match
-                UnityEngine.Debug.LogWarning($"No ChipValue found for {value}, defaulting to One");
-                return ChipValue.One;
+                // Throw exception when value doesn't match any chip type
+                throw new System.ArgumentException($"No ChipValue found for {value}");
         }
     }
 }

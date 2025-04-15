@@ -12,6 +12,7 @@ public class EventBinding<T> : IEventBinding<T> where T : IEvent
 {
     private Action<T> onEvent = _ => { };
     private Action onEventNoArgs = () => { };
+    private Action<int> addFreeChips;
 
     //Get and set the event handler
     Action<T> IEventBinding<T>.OnEvent
@@ -32,6 +33,11 @@ public class EventBinding<T> : IEventBinding<T> where T : IEvent
 
     //Constructor for event binding with no arguments
     public EventBinding(Action onEventNoArgs) => this.onEventNoArgs = onEventNoArgs;
+
+    public EventBinding(Action<int> addFreeChips)
+    {
+        this.addFreeChips = addFreeChips;
+    }
 
     //Add an event handler for no arguments
     public void Add(Action onEvent) => onEventNoArgs += onEvent;

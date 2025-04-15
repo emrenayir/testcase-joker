@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
@@ -9,73 +10,57 @@ using UnityEngine;
 /// </summary>
 public class BetController : MonoBehaviour
 {
-    public event Action OnBetRemoved;
-    public event Action<BetButton> OnBetPlaced;
     public bool IsBettingEnabled = true;
 
     [SerializeField] private ChipSelectionController chipSelectionController;
     [SerializeField] private List<BetButton> betButtons;
 
     private List<BetButton> activeBets = new List<BetButton>();
-
-
+    private int winningNumber;
 
     private EventBinding<ResetBetButtonEvent> resetBetBinding;
     private EventBinding<GameStateChangeEvent> gameStateBinding;
+    private EventBinding<RouletteFinishedEvent> rouletteFinishedBinding;
 
     void Awake()
     {
-        OnBetPlaced += HandleBet;
-
         foreach (var betButton in betButtons)
         {
             betButton.SetBetButton(chipSelectionController, this);
         }
 
+        resetBetBinding = new EventBinding<ResetBetButtonEvent>(ClearAllBets);
+        EventBus<ResetBetButtonEvent>.Register(resetBetBinding);
 
+        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
+        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
 
+        rouletteFinishedBinding = new EventBinding<RouletteFinishedEvent>(OnRouletteFinished);
+        EventBus<RouletteFinishedEvent>.Register(rouletteFinishedBinding);
+    }
 
-         resetBetBinding = new EventBinding<ResetBetButtonEvent>(ClearAllBets);
-         EventBus<ResetBetButtonEvent>.Register(resetBetBinding); 
-
-         gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
-         EventBus<GameStateChangeEvent>.Register(gameStateBinding);
+    private void OnRouletteFinished(RouletteFinishedEvent @event)
+    {
+        winningNumber = @event.WinningNumber;
+        StartCoroutine(ProcessResult());
     }
 
     private void OnGameStateChanged(GameStateChangeEvent @event)
     {
-        switch (@event.NewState)
-        {
-            case GameState.InBet:
-                break;
-                
-            case GameState.Running:
-                IsBettingEnabled = false;
-                break;
-                
-            case GameState.Finish:
-                break;
-        }
+        IsBettingEnabled = @event.NewState == GameState.InBet ? true : false;
     }
-
 
     void Start()
     {
-        // Load saved bets when the game starts
-        /*
-        if (playerSave != null)
-        {
-            playerSave.LoadBets(this);
-        }
-        */
+        PlayerSave.Instance.LoadBets(this);
     }
-    
+
     void OnApplicationQuit()
     {
         // Save bets when the game is closed
         SaveBets();
     }
-    
+
     void OnApplicationPause(bool pauseStatus)
     {
         // Save bets when the game is paused (mobile or tab switching)
@@ -84,28 +69,19 @@ public class BetController : MonoBehaviour
             SaveBets();
         }
     }
-    
+
+
     private void SaveBets()
     {
-        /*
-        if (playerSave != null)
+        if (activeBets.Count > 0)
         {
-            if (activeBets.Count > 0)
-            {
-                playerSave.SaveBets(activeBets);
-            }
-            else
-            {
-                // Even if there are no active bets, save the player money
-                playerSave.SavePlayerMoneyOnly();
-            }
+            PlayerSave.Instance.SaveBets(activeBets);
         }
-        */
     }
 
     public void InvokePlaceBet(BetButton betButton)
     {
-        OnBetPlaced?.Invoke(betButton);
+        HandleBet(betButton);
     }
 
     private void HandleBet(BetButton betButton)
@@ -124,7 +100,7 @@ public class BetController : MonoBehaviour
     /// Process the result of the bet
     /// </summary>
     /// <param name="winningNumber">The winning number</param>
-    public void ProcessResult(int winningNumber)
+    public IEnumerator ProcessResult()
     {
         int totalWinnings = 0;
         int lostBets = 0;
@@ -140,7 +116,6 @@ public class BetController : MonoBehaviour
             //Calculate the payout
             if (isWinner)
             {
-                Debug.Log($"Bet {bet.GetBetType()} $ {bet.gameObject.name} is a winner. Total chip value: {bet.TotalChipValue}");
                 totalWinnings += bet.CalculatePayout(bet.TotalChipValue);
             }
             else
@@ -151,20 +126,13 @@ public class BetController : MonoBehaviour
 
         PlayerSave.Instance.ProcessPayment(totalWinnings, lostBets);
 
-        Debug.Log($"Winning number: {winningNumber}. Total winnings: {totalWinnings}");
+        // Wait for a moment before starting a new round
+        yield return new WaitForSeconds(3f);
+
+        EventBus<BetProcessingFinishedEvent>.Raise(new BetProcessingFinishedEvent { IsWinner = totalWinnings - lostBets > 0 });
         
-        // Save the player's money after processing results
-        /*
-        if (playerSave != null)
-        {
-            playerSave.SavePlayerMoneyOnly();
-        }
-        */
         
-        // After processing the round, clear the active bets and saved data
-        // This should be called by a "New Round" function in your game
-        // If you want automatic clearing after each round, uncomment the next line:
-        // ClearAllBets();
+        ClearAllBets();
     }
 
     /// <summary>
@@ -172,20 +140,15 @@ public class BetController : MonoBehaviour
     /// </summary>
     public void ClearAllBets()
     {
-        activeBets.Clear();
-        OnBetRemoved?.Invoke();
-        
-        // Clear saved bets data as well
-        /*
-        if (playerSave != null)
+        foreach (var bet in activeBets)
         {
-            playerSave.ClearSavedBets();
+            bet.ResetChips();
         }
-        */
+        activeBets.Clear();
         PlayerSave.Instance.ClearSavedBets();
     }
-    
-    
+
+
     /// <summary>
     /// Add a bet to the active bets list if it's not already there
     /// </summary>
@@ -196,7 +159,7 @@ public class BetController : MonoBehaviour
             activeBets.Add(betButton);
         }
     }
-    
+
     /// <summary>
     /// Get the list of bet buttons
     /// </summary>
@@ -204,38 +167,4 @@ public class BetController : MonoBehaviour
     {
         return betButtons;
     }
-    
-    /// <summary>
-    /// Get the list of active bets
-    /// </summary>
-    public List<BetButton> GetActiveBets()
-    {
-        return activeBets;
-    }
-
-    /// <summary>
-    /// Reset the entire game state
-    /// </summary>
-    public void ResetGame()
-    {
-        // Clear all bets (which also clears saved data)
-        ClearAllBets();
-        
-        // Reset player money to default value if needed
- 
-        PlayerSave.Instance.SetMoney(1000); // Reset to default starting money  ?????????? why is this needed?
-        
-        
-        // Save the reset state
-        /*
-        if (playerSave != null)
-        {
-            playerSave.SavePlayerMoneyOnly();
-        }
-        */
-        
-        Debug.Log("Game has been reset. All bets cleared and money reset.");
-    }
-
-
 }

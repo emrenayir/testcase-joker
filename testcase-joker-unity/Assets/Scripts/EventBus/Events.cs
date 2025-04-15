@@ -8,6 +8,22 @@ public struct GameStateChangeEvent : IEvent
     public GameState NewState;
 }
 
+//Roulette events
+public struct RouletteStartedEvent : IEvent{}
+
+public struct RouletteFinishedEvent : IEvent{
+    public int WinningNumber;
+}
+
+public struct OnOutcomeSelectedEvent : IEvent{
+    public int Outcome;
+}
+
+//Bet events
+public struct BetProcessingFinishedEvent : IEvent{
+    public bool IsWinner;
+}
+
 //Event for UI button clicks
 public struct BetPlacementConfirmedButtonEvent : IEvent{}
 

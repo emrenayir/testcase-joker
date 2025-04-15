@@ -10,10 +10,9 @@ public class CornerBet : BetButton
     {
         base.Start();
         // For a corner bet, we need to handle the 4 adjacent numbers
-        numbers[0] = startNumber;
-        numbers[1] = startNumber + 1;
-        numbers[2] = startNumber + 3;
-        numbers[3] = startNumber + 4;
+        for (int i = 0; i < 4; i++) {
+            numbers[i] = startNumber + (i < 2 ? i : i + 1);
+        }
     }
     
     public override BetType GetBetType()

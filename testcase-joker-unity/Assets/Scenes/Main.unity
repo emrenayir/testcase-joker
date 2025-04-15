@@ -905,8 +905,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d5064478559f486dbcb1ce0b663d6c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rouletteController: {fileID: 1012579952304367563}
-  betController: {fileID: 1464158156}
   winParticles: {fileID: 1882321155}
 --- !u!4 &664258795
 Transform:
@@ -935,7 +933,7 @@ GameObject:
   - component: {fileID: 699626579}
   - component: {fileID: 699626580}
   m_Layer: 5
-  m_Name: BetAmountLabel
+  m_Name: TotalWinLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1488,7 +1486,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1269524285}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 402590973}
+        m_TargetAssemblyTypeName: OutcomeSelectionController, Assembly-CSharp
+        m_MethodName: OpenClose
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1269524285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1988,18 +1998,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1431928344}
   m_CullTransparentMesh: 0
---- !u!114 &1464158156 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5148514698946228037, guid: cc031cdc76db34d3e88b5e29ab076f40,
-    type: 3}
-  m_PrefabInstance: {fileID: 2832123044700603473}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fbafbb44df0343e4a379839cba32d5b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1492290698
 GameObject:
   m_ObjectHideFlags: 0
@@ -2439,7 +2437,7 @@ GameObject:
   - component: {fileID: 1776300378}
   - component: {fileID: 1776300377}
   m_Layer: 5
-  m_Name: BetAmountLabel
+  m_Name: TotalProfitLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7937,7 +7935,7 @@ GameObject:
   - component: {fileID: 2040303769}
   - component: {fileID: 2040303770}
   m_Layer: 5
-  m_Name: BetAmountLabel
+  m_Name: TotalSpinLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8263,14 +8261,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sfxSource: {fileID: 2072196565}
-  availableSounds:
-  - {fileID: 11400000, guid: df10646f247e4451fa07a1ed981a7b61, type: 2}
-  - {fileID: 11400000, guid: 45a28415409e342b4987e4f8bb328965, type: 2}
-  - {fileID: 11400000, guid: 76dd63ebd33114d3f96edb547296c805, type: 2}
-  - {fileID: 11400000, guid: 3b3826e4f136a4335b0d0d8821cd8303, type: 2}
-  - {fileID: 11400000, guid: 1f26593a4728040109631d77dbffd047, type: 2}
-  - {fileID: 11400000, guid: c412e194011cc4826a69e981f77f8f6e, type: 2}
-  - {fileID: 11400000, guid: 0ce55a128b98349359a2cce0a056e7c2, type: 2}
+  audioClips:
+  - {fileID: 8300000, guid: 0d97e4c3827c196448116eb927e3dad6, type: 3}
+  - {fileID: 8300000, guid: f7ac0c93a9f5744a6b85a13e35ec5cfe, type: 3}
+  - {fileID: 8300000, guid: 60ab8eb6d3d444e46943548a68e08de6, type: 3}
+  - {fileID: 8300000, guid: b740186316374584ab5a54cf864cbc79, type: 3}
 --- !u!4 &2072196567
 Transform:
   m_ObjectHideFlags: 0
@@ -8686,18 +8681,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &1012579952304367563 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4674876871453933744, guid: 7f4be2dea52064d849af4c19081d8643,
-    type: 3}
-  m_PrefabInstance: {fileID: 7524795386434455192}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 803ba317fda7040c6b628bf9386e236c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &1061880236696384022
 RectTransform:
   m_ObjectHideFlags: 0

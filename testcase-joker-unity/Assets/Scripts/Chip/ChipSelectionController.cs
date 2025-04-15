@@ -16,11 +16,11 @@ public class ChipSelectionController : MonoBehaviour
     /// <summary>
     /// Currently selected chip value.
     /// </summary>
-    public ChipValue SelectedChipValue 
-    { 
-        get { return selectedChipValue; } 
-        private set 
-        { 
+    public ChipValue SelectedChipValue
+    {
+        get { return selectedChipValue; }
+        private set
+        {
             selectedChipValue = value;
             OnChipSelected?.Invoke(selectedChipValue);
         }
@@ -34,14 +34,35 @@ public class ChipSelectionController : MonoBehaviour
     void Awake()
     {
         chipButtonFactory = GetComponent<ChipButtonFactory>();
-        // Set default value
-        SelectedChipValue = ChipValue.One;
     }
 
     void Start()
     {
         chipButtons = chipButtonFactory.CreateChipButtons(this);
-        chipButtons[0].SetSelected(true);
+
+        // Set default value
+        SelectedChipValue = ChipValue.One;
+        SelectChipButtonByValue(SelectedChipValue);
+    }
+
+    /// <summary>
+    /// Selects the chip button matching the specified value.
+    /// </summary>
+    /// <param name="value">The chip value to select.</param>
+    private void SelectChipButtonByValue(ChipValue value)
+    {
+        // Deselect all buttons first
+        foreach (var chipButton in chipButtons)
+        {
+            chipButton.SetSelected(false);
+        }
+
+        // Find and select the button with matching value
+        ChipSelectionButton buttonToSelect = chipButtons.Find(button => button.Value == value);
+
+        buttonToSelect.SetSelected(true);
+        SelectedChipValue = buttonToSelect.Value;
+
     }
 
     /// <summary>

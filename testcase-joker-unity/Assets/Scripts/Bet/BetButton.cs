@@ -9,25 +9,26 @@ using System.Collections.Generic;
 /// It holds the logic of specific bet types.
 /// </summary>
 [RequireComponent(typeof(BoxCollider))]
-public abstract class BetButton : MonoBehaviour, IBetButton
+public abstract class BetButton : MonoBehaviour
 {
     #region Fields
     public int TotalChipValue = 0;
     [SerializeField] protected TableColorSettings tableColorSettings;
+    [SerializeField] protected MeshRenderer quadRenderer;
     protected ChipSelectionController chipSelectionController;
     protected bool isHighlighted = false;
     protected bool isWinning = false;
     protected Material quadMaterial;
-    protected MeshRenderer quadRenderer;
+  
     protected Color targetColor;
     protected Coroutine colorChangeCoroutine;
     protected BoxCollider cachedBoxCollider;
     protected BetController betController;
 
     private int chipIndex = 0;
-    private const int MAX_CHIPS = 20; // Maximum number of chips that can be placed on a single bet
     private const float chipStackOffset = 0.01f; // Vertical offset for stacking chips
     private List<Chip> placedChips = new List<Chip>(); // List of chips objects for animations
+
     #endregion
 
     #region Unity Lifecycle Methods
@@ -47,23 +48,8 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         targetColor = tableColorSettings.normalColor;
         SetQuadColor(tableColorSettings.normalColor);
 
-
-        // Subscribe to the bet removed event
-        betController.OnBetRemoved += ResetChips;
     }
 
-    protected void OnDisable()
-    {
-        betController.OnBetRemoved -= ResetChips;
-    }
-
-    private void Update()
-    {
-        if (colorChangeCoroutine == null && quadRenderer.material.color != targetColor)
-        {
-            colorChangeCoroutine = StartCoroutine(LerpColor());
-        }
-    }
     #endregion
 
     #region Initialization
@@ -106,13 +92,15 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         if (!betController.IsBettingEnabled) return;
 
         // Check if we've reached the chip limit also check user money is enough
-        if (chipIndex >= MAX_CHIPS || ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue) > PlayerSave.Instance.GetCurrentMoney())
+        if (ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue) > PlayerSave.Instance.GetCurrentMoney())
         {
+            Debug.Log("Not enough money"); 
+            SoundManager.Instance.PlaySound("Error");
             return;
         } 
 
         // Play the chip placement sound
-        SoundManager.Instance.PlaySFX("Chip");
+        SoundManager.Instance.PlaySound("Chip");
 
         // Add the chip value to the total chip value for later payout calculation
         TotalChipValue += ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue);
@@ -212,9 +200,14 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         if (colorChangeCoroutine != null)
         {
             StopCoroutine(colorChangeCoroutine);
+            colorChangeCoroutine = null;
         }
         
-        colorChangeCoroutine = StartCoroutine(LerpColor());
+        // Check if the current color already matches the target
+        if (quadRenderer.material.color != targetColor)
+        {
+            colorChangeCoroutine = StartCoroutine(LerpColor());
+        }
     }
     
     protected IEnumerator LerpColor()
@@ -237,14 +230,7 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     public virtual void ShowWinningStatus(bool isWinning)
     {
         this.isWinning = isWinning;
-        if (isWinning)
-        {
-            TransitionToColor(tableColorSettings.winningColor);
-        }
-        else
-        {
-            TransitionToColor(tableColorSettings.normalColor);
-        }
+        TransitionToColor(isWinning ? tableColorSettings.winningColor : tableColorSettings.normalColor);
     }
     #endregion
 

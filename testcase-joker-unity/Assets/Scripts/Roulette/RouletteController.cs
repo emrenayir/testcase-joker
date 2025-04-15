@@ -1,4 +1,5 @@
 using System;
+using Game;
 using UnityEngine;
 
 /// <summary>
@@ -7,57 +8,53 @@ using UnityEngine;
 /// </summary>
 public class RouletteController : MonoBehaviour
 {
-    [SerializeField] private RouletteWheel wheel;
     [SerializeField] private RouletteBall ball;
     [SerializeField] private RouletteOutcomeManager outcomeManager;
     
     private bool isSpinning = false;
 
-    private Action onSpinCompleted;
+    private EventBinding<RouletteFinishedEvent> rouletteFinishedBinding;
 
+    private EventBinding<GameStateChangeEvent> gameStateBinding;
     private void Awake() 
     {
-        onSpinCompleted += () => 
-        {
-            Debug.Log("Spin completed");
-            isSpinning = false;
-        };
+        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
+        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
+
+        rouletteFinishedBinding = new EventBinding<RouletteFinishedEvent>(OnRouletteFinished);
+        EventBus<RouletteFinishedEvent>.Register(rouletteFinishedBinding);
     }
 
-    void Update()
+    private void OnDestroy()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        EventBus<GameStateChangeEvent>.UnRegister(gameStateBinding);
+        EventBus<RouletteFinishedEvent>.UnRegister(rouletteFinishedBinding);
+    }
+
+    private void OnRouletteFinished(RouletteFinishedEvent @event)
+    {
+        isSpinning = false;
+    }
+
+    private void OnGameStateChanged(GameStateChangeEvent @event)
+    {
+        if(@event.NewState == GameState.Running)
         {
             StartRoulette();
         }
     }
-
-    void OnDisable()
-    {
-        onSpinCompleted = null;
-    }
-
-    public void InvokeSpinCompleted()
-    {
-        onSpinCompleted?.Invoke();
-    }
-
 
     /// <summary>
     /// Starts the spin of the roulette wheel.
     /// </summary>
     public void StartRoulette()
     {
-        Debug.Log("Starting roulette");
         if (isSpinning) return;
         
+
+        EventBus<RouletteStartedEvent>.Raise(new RouletteStartedEvent());
         isSpinning = true;
         int targetNumber = outcomeManager.GetTargetNumber();
         ball.StartRolling(targetNumber);
-    }
-
-    public int GetResult()
-    {
-        return outcomeManager.GetResult();
     }
 }

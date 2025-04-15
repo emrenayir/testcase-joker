@@ -10,12 +10,10 @@ public class SixLineBet : BetButton
     {
         base.Start();
         // Six line bet covers two adjacent rows of numbers
-        numbers[0] = startNumber;
-        numbers[1] = startNumber + 1;
-        numbers[2] = startNumber + 2;
-        numbers[3] = startNumber + 3;
-        numbers[4] = startNumber + 4;
-        numbers[5] = startNumber + 5;
+        for (int i = 0; i < 6; i++)
+        {
+            numbers[i] = startNumber + i;
+        }
     }
     
     public override BetType GetBetType()

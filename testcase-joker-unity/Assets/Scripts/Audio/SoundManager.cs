@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Manages the sound effects for the game.
-/// Uses a singleton pattern to ensure only one instance exists.
+/// Simple sound manager that plays audio clips directly.
 /// </summary>
 public class SoundManager : MonoBehaviour
 {
@@ -11,36 +10,44 @@ public class SoundManager : MonoBehaviour
 
     [SerializeField] private AudioSource sfxSource;
     
-    [Header("Audio Events")]
-    [SerializeField] private List<AudioEvent> availableSounds;
+    [Header("Audio Clips")]
+    [SerializeField] private List<AudioClip> audioClips;
     
-    private Dictionary<string, AudioEvent> soundDictionary = new Dictionary<string, AudioEvent>();
+    private Dictionary<string, AudioClip> soundDictionary = new Dictionary<string, AudioClip>();
 
     private void Awake()
     {
-        // Singleton pattern
         if (Instance == null)
         {
             Instance = this;
-            
-            // Initialize sound dictionary
-            foreach (var sound in availableSounds)
-            {
-                soundDictionary.Add(sound.name, sound);
-            }
+            InitializeSounds();
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
     }
-
-
-    public void PlaySFX(string soundName)
+    
+    private void InitializeSounds()
     {
-        if (soundDictionary.TryGetValue(soundName, out AudioEvent audioEvent))
+        foreach (var clip in audioClips)
         {
-            audioEvent.Play(sfxSource);
+            if (clip != null)
+            {
+                soundDictionary[clip.name] = clip;
+            }
+        }
+    }
+
+    public void PlaySound(string soundName, float volume = 1f, float pitch = 1f)
+    {
+        if (soundDictionary.TryGetValue(soundName, out AudioClip clip))
+        {
+            sfxSource.pitch = pitch;
+            sfxSource.volume = volume;
+            sfxSource.clip = clip;
+            sfxSource.Play();
         }
         else
         {
@@ -48,7 +55,7 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void StopSFX()
+    public void StopSound()
     {
         sfxSource.Stop();
     }
