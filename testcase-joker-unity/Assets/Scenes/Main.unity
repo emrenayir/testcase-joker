@@ -363,7 +363,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 156839930}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8706202256636353850}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnAddFreeChipsClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &156839930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -895,9 +907,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rouletteController: {fileID: 1012579952304367563}
   betController: {fileID: 1464158156}
-  userMoney: {fileID: 1103338744}
-  uiManager: {fileID: 8706202256636353850}
-  playerSave: {fileID: 1339960512}
   winParticles: {fileID: 1882321155}
 --- !u!4 &664258795
 Transform:
@@ -1184,54 +1193,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1004067889}
   m_CullTransparentMesh: 0
---- !u!1 &1103338743
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1103338745}
-  - component: {fileID: 1103338744}
-  m_Layer: 0
-  m_Name: UserMoney
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1103338744
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1103338743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4672dadaffbc24491bff9f1ecd74a19f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  userMoney: 1000
-  currentBet: 0
-  currentPayment: 0
-  uiManager: {fileID: 8706202256636353850}
---- !u!4 &1103338745
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1103338743}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.37737954, y: 0.05767584, z: 1.4234825}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1123020638
 GameObject:
   m_ObjectHideFlags: 0
@@ -1743,51 +1704,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1339960511
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1339960513}
-  - component: {fileID: 1339960512}
-  m_Layer: 0
-  m_Name: PlayerSave
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1339960512
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339960511}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61681484c24f64331b927d00bb730d23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  userMoney: {fileID: 1103338744}
---- !u!4 &1339960513
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339960511}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.57357603, y: -0, z: -0, w: 0.81915236}
-  m_LocalPosition: {x: 0.047255825, y: 1.064, z: -0.151}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8757,7 +8673,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8546540135725327730}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8706202256636353850}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnBetPlacementConfirmed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1012579952304367563 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4674876871453933744, guid: 7f4be2dea52064d849af4c19081d8643,
@@ -9011,12 +8939,12 @@ PrefabInstance:
         type: 3}
       propertyPath: userMoney
       value: 
-      objectReference: {fileID: 1103338744}
+      objectReference: {fileID: 0}
     - target: {fileID: 5148514698946228037, guid: cc031cdc76db34d3e88b5e29ab076f40,
         type: 3}
       propertyPath: playerSave
       value: 
-      objectReference: {fileID: 1339960512}
+      objectReference: {fileID: 0}
     - target: {fileID: 5148514698946228037, guid: cc031cdc76db34d3e88b5e29ab076f40,
         type: 3}
       propertyPath: chipSelectionController
@@ -9158,7 +9086,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5530914359857187335}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8706202256636353850}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnResetBetClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3547653755955764651
 GameObject:
   m_ObjectHideFlags: 0
@@ -9459,7 +9399,7 @@ GameObject:
   - component: {fileID: 8546540135725327730}
   - component: {fileID: 465798170265112548}
   m_Layer: 5
-  m_Name: PlayButton
+  m_Name: ConfirmButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9787,7 +9727,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdc4602058ab040fe96ae35d3b1e41ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userMoney: {fileID: 1103338744}
   confirmButton: {fileID: 465798170265112548}
   addFreeChipsButton: {fileID: 156839929}
   resetBetButton: {fileID: 3178264895341836921}
@@ -9802,7 +9741,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 498980566}
-  - {fileID: 1339960513}
   - {fileID: 1849915551}
   - {fileID: 1401962145}
   - {fileID: 1580191167}
@@ -9811,7 +9749,6 @@ SceneRoots:
   - {fileID: 6066386863944801376}
   - {fileID: 2832123044700603473}
   - {fileID: 4174853619501283732}
-  - {fileID: 1103338745}
   - {fileID: 2072196567}
   - {fileID: 1324757529}
   - {fileID: 8706202256636353849}
