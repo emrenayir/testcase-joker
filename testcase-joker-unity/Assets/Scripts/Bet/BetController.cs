@@ -21,6 +21,7 @@ public class BetController : MonoBehaviour
     private EventBinding<ResetBetButtonEvent> resetBetBinding;
     private EventBinding<GameStateChangeEvent> gameStateBinding;
     private EventBinding<RouletteFinishedEvent> rouletteFinishedBinding;
+    private EventBinding<LoadSavedBetsEvent> loadSavedBetsBinding;
 
     void Awake()
     {
@@ -37,6 +38,9 @@ public class BetController : MonoBehaviour
 
         rouletteFinishedBinding = new EventBinding<RouletteFinishedEvent>(OnRouletteFinished);
         EventBus<RouletteFinishedEvent>.Register(rouletteFinishedBinding);
+        
+        loadSavedBetsBinding = new EventBinding<LoadSavedBetsEvent>(OnLoadSavedBets);
+        EventBus<LoadSavedBetsEvent>.Register(loadSavedBetsBinding);
     }
 
     private void OnRouletteFinished(RouletteFinishedEvent @event)
@@ -52,7 +56,28 @@ public class BetController : MonoBehaviour
 
     void Start()
     {
-        PlayerSave.Instance.LoadBets(this);
+        // PlayerSave will handle loading through events
+    }
+    
+    private void OnLoadSavedBets(LoadSavedBetsEvent @event)
+    {
+        List<BetData> savedBets = @event.SavedBets;
+        
+        if (savedBets != null && savedBets.Count > 0)
+        {
+            foreach (var betData in savedBets)
+            {
+                BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
+                if (betButton != null)
+                {
+                    betButton.LoadBetData(betData);
+                    if (!activeBets.Contains(betButton))
+                    {
+                        activeBets.Add(betButton);
+                    }
+                }
+            }
+        }
     }
 
     void OnApplicationQuit()
@@ -70,12 +95,11 @@ public class BetController : MonoBehaviour
         }
     }
 
-
     private void SaveBets()
     {
         if (activeBets.Count > 0)
         {
-            PlayerSave.Instance.SaveBets(activeBets);
+            EventBus<SaveBetsEvent>.Raise(new SaveBetsEvent { ActiveBets = activeBets });
         }
     }
 
@@ -86,7 +110,8 @@ public class BetController : MonoBehaviour
 
     private void HandleBet(BetButton betButton)
     {
-        PlayerSave.Instance.PlaceBet(ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue));
+        int chipValue = ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue);
+        EventBus<PlaceBetEvent>.Raise(new PlaceBetEvent { ChipValue = chipValue });
 
         //Check if the bet is already in the list
         if (activeBets.Contains(betButton))
@@ -124,7 +149,7 @@ public class BetController : MonoBehaviour
             }
         }
 
-        PlayerSave.Instance.ProcessPayment(totalWinnings, lostBets);
+        EventBus<ProcessPaymentEvent>.Raise(new ProcessPaymentEvent { Payment = totalWinnings, LostBets = lostBets });
 
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
@@ -145,7 +170,8 @@ public class BetController : MonoBehaviour
             bet.ResetChips();
         }
         activeBets.Clear();
-        PlayerSave.Instance.ClearSavedBets();
+        
+        EventBus<ClearSavedBetsEvent>.Raise(new ClearSavedBetsEvent());
     }
 
 

@@ -23,6 +23,11 @@ public class PlayerSave
     private EventBinding<OnCurrentRoundProfitChangedEvent> onCurrentRoundProfitChangedBinding;
     private EventBinding<ResetBetButtonEvent> resetBetBinding;
     private EventBinding<AddFreeChipsButtonClickedEvent> addFreeChipsBinding;   
+    private EventBinding<SaveBetsEvent> saveBetsBinding;
+    private EventBinding<LoadBetsRequestEvent> loadBetsRequestBinding;
+    private EventBinding<PlaceBetEvent> placeBetBinding;
+    private EventBinding<ProcessPaymentEvent> processPaymentBinding;
+    private EventBinding<ClearSavedBetsEvent> clearSavedBetsBinding;
 
     private int totalSpins = 0;
     private int totalWins = 0;
@@ -89,6 +94,20 @@ public class PlayerSave
         addFreeChipsBinding = new EventBinding<AddFreeChipsButtonClickedEvent>(AddFreeChips);
         EventBus<AddFreeChipsButtonClickedEvent>.Register(addFreeChipsBinding);
 
+        saveBetsBinding = new EventBinding<SaveBetsEvent>(OnSaveBets);
+        EventBus<SaveBetsEvent>.Register(saveBetsBinding);
+
+        loadBetsRequestBinding = new EventBinding<LoadBetsRequestEvent>(OnLoadBetsRequest);
+        EventBus<LoadBetsRequestEvent>.Register(loadBetsRequestBinding);
+        
+        placeBetBinding = new EventBinding<PlaceBetEvent>(OnPlaceBet);
+        EventBus<PlaceBetEvent>.Register(placeBetBinding);
+        
+        processPaymentBinding = new EventBinding<ProcessPaymentEvent>(OnProcessPayment);
+        EventBus<ProcessPaymentEvent>.Register(processPaymentBinding);
+        
+        clearSavedBetsBinding = new EventBinding<ClearSavedBetsEvent>(OnClearSavedBets);
+        EventBus<ClearSavedBetsEvent>.Register(clearSavedBetsBinding);
         
         // Load and notify stats
         PlayerStatsData stats = LoadPlayerStats();
@@ -97,6 +116,8 @@ public class PlayerSave
             EventBus<UpdateStatsEvent>.Raise(new UpdateStatsEvent { PlayerStatsData = stats });
         }
         
+        // Notify system that we're ready to load saved bets
+        EventBus<LoadBetsRequestEvent>.Raise(new LoadBetsRequestEvent());
     }
 
     private void OnCurrentRoundProfitChanged(OnCurrentRoundProfitChangedEvent @event)
@@ -130,6 +151,21 @@ public class PlayerSave
     }
 
     // Money Management Methods
+
+    private void OnPlaceBet(PlaceBetEvent @event)
+    {
+        PlaceBet(@event.ChipValue);
+    }
+    
+    private void OnProcessPayment(ProcessPaymentEvent @event)
+    {
+        ProcessPayment(@event.Payment, @event.LostBets);
+    }
+    
+    private void OnClearSavedBets(ClearSavedBetsEvent @event)
+    {
+        ClearSavedBets();
+    }
 
     public bool PlaceBet(int chipValue)
     {
@@ -233,7 +269,12 @@ public class PlayerSave
     
     // Bet Data Management
     
-    public void SaveBets(List<BetButton> activeBets)
+    private void OnSaveBets(SaveBetsEvent @event)
+    {
+        SaveBets(@event.ActiveBets);
+    }
+    
+    private void SaveBets(List<BetButton> activeBets)
     {
         if (activeBets == null || activeBets.Count == 0)
         {
@@ -270,12 +311,12 @@ public class PlayerSave
         PlayerPrefs.Save();
     }
     
-    public PlayerStatsData LoadBets(BetController betController)
+    private void OnLoadBetsRequest(LoadBetsRequestEvent @event)
     {
         if (!PlayerPrefs.HasKey(ACTIVE_BETS_KEY))
         {
             Debug.Log("No saved bet data found");
-            return null;
+            return;
         }
         
         string jsonData = PlayerPrefs.GetString(ACTIVE_BETS_KEY);
@@ -284,7 +325,7 @@ public class PlayerSave
         if (saveData == null)
         {
             Debug.Log("No valid save data found");
-            return null;
+            return;
         }
         
         // Load player money data
@@ -300,28 +341,21 @@ public class PlayerSave
         
         SetCurrentPayment(saveData.LastRoundEarnings);
         
-        // Load bets data
+        // Notify BetController of saved bets to load
         if (saveData.Bets != null && saveData.Bets.Count > 0)
         {
-            List<BetButton> betButtons = betController.GetBetButtons();
-            
-            foreach (var betData in saveData.Bets)
-            {
-                BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
-                if (betButton != null)
-                {
-                    betButton.LoadBetData(betData);
-                }
-            }
+            EventBus<LoadSavedBetsEvent>.Raise(new LoadSavedBetsEvent { SavedBets = saveData.Bets });
         }
         
-        // Return stats data
-        return new PlayerStatsData
+        // Update stats
+        PlayerStatsData statsData = new PlayerStatsData
         {
             TotalSpins = saveData.TotalSpins,
             TotalWins = saveData.TotalWins,
             TotalProfit = saveData.TotalProfit
         };
+        
+        EventBus<UpdateStatsEvent>.Raise(new UpdateStatsEvent { PlayerStatsData = statsData });
     }
     
     public void ClearSavedBets()

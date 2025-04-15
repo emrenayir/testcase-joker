@@ -1,4 +1,6 @@
 using Game;
+using System;
+using System.Collections.Generic;
 
 public interface IEvent { }
 
@@ -24,6 +26,37 @@ public struct BetProcessingFinishedEvent : IEvent{
     public bool IsWinner;
 }
 
+public struct SaveBetsEvent : IEvent
+{
+    public List<BetButton> ActiveBets;
+}
+
+public struct LoadBetsRequestEvent : IEvent
+{
+    // Just a signal event
+}
+
+public struct LoadSavedBetsEvent : IEvent
+{
+    public List<BetData> SavedBets;
+}
+
+public struct PlaceBetEvent : IEvent
+{
+    public int ChipValue;
+}
+
+public struct ProcessPaymentEvent : IEvent
+{
+    public int Payment;
+    public int LostBets;
+}
+
+public struct ClearSavedBetsEvent : IEvent
+{
+    // Just a signal event
+}
+
 //Event for UI button clicks
 public struct BetPlacementConfirmedButtonEvent : IEvent{}
 
@@ -43,7 +76,7 @@ public struct OnBetChangedEvent : IEvent
     public int Bet;
 }
 
-public struct OnPaymentChangedEvent : IEvent //I might not need this event
+public struct OnPaymentChangedEvent : IEvent 
 {
     public int Payment;
 }
@@ -65,7 +98,7 @@ public struct OnTotalProfitChangedEvent : IEvent
     public int ProfitChangeAmount;
 }
 
-public struct OnCurrentRoundProfitChangedEvent : IEvent //I might not need this event
+public struct OnCurrentRoundProfitChangedEvent : IEvent 
 {
     public int CurrentRoundProfitChangeAmount;
 }
