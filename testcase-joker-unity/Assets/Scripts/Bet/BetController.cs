@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game;
 using UnityEngine;
 
 /// <summary>
@@ -13,11 +14,14 @@ public class BetController : MonoBehaviour
     public bool IsBettingEnabled = true;
 
     [SerializeField] private ChipSelectionController chipSelectionController;
-    [SerializeField] private UserMoney userMoney;
     [SerializeField] private List<BetButton> betButtons;
-    [SerializeField] private PlayerSave playerSave;
 
     private List<BetButton> activeBets = new List<BetButton>();
+
+
+
+    private EventBinding<ResetBetButtonEvent> resetBetBinding;
+    private EventBinding<GameStateChangeEvent> gameStateBinding;
 
     void Awake()
     {
@@ -25,17 +29,45 @@ public class BetController : MonoBehaviour
 
         foreach (var betButton in betButtons)
         {
-            betButton.SetBetButton(chipSelectionController, this, userMoney);
+            betButton.SetBetButton(chipSelectionController, this);
+        }
+
+
+
+
+         resetBetBinding = new EventBinding<ResetBetButtonEvent>(ClearAllBets);
+         EventBus<ResetBetButtonEvent>.Register(resetBetBinding); 
+
+         gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
+         EventBus<GameStateChangeEvent>.Register(gameStateBinding);
+    }
+
+    private void OnGameStateChanged(GameStateChangeEvent @event)
+    {
+        switch (@event.NewState)
+        {
+            case GameState.InBet:
+                break;
+                
+            case GameState.Running:
+                IsBettingEnabled = false;
+                break;
+                
+            case GameState.Finish:
+                break;
         }
     }
-    
+
+
     void Start()
     {
         // Load saved bets when the game starts
+        /*
         if (playerSave != null)
         {
             playerSave.LoadBets(this);
         }
+        */
     }
     
     void OnApplicationQuit()
@@ -55,6 +87,7 @@ public class BetController : MonoBehaviour
     
     private void SaveBets()
     {
+        /*
         if (playerSave != null)
         {
             if (activeBets.Count > 0)
@@ -67,6 +100,7 @@ public class BetController : MonoBehaviour
                 playerSave.SavePlayerMoneyOnly();
             }
         }
+        */
     }
 
     public void InvokePlaceBet(BetButton betButton)
@@ -76,7 +110,7 @@ public class BetController : MonoBehaviour
 
     private void HandleBet(BetButton betButton)
     {
-        userMoney.PlaceBet(ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue));
+        PlayerSave.Instance.PlaceBet(ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue));
 
         //Check if the bet is already in the list
         if (activeBets.Contains(betButton))
@@ -115,15 +149,17 @@ public class BetController : MonoBehaviour
             }
         }
 
-        userMoney.ProcessPayment(totalWinnings, lostBets);
+        PlayerSave.Instance.ProcessPayment(totalWinnings, lostBets);
 
         Debug.Log($"Winning number: {winningNumber}. Total winnings: {totalWinnings}");
         
         // Save the player's money after processing results
+        /*
         if (playerSave != null)
         {
             playerSave.SavePlayerMoneyOnly();
         }
+        */
         
         // After processing the round, clear the active bets and saved data
         // This should be called by a "New Round" function in your game
@@ -140,10 +176,13 @@ public class BetController : MonoBehaviour
         OnBetRemoved?.Invoke();
         
         // Clear saved bets data as well
+        /*
         if (playerSave != null)
         {
             playerSave.ClearSavedBets();
         }
+        */
+        PlayerSave.Instance.ClearSavedBets();
     }
     
     
@@ -183,17 +222,20 @@ public class BetController : MonoBehaviour
         ClearAllBets();
         
         // Reset player money to default value if needed
-        if (userMoney != null)
-        {
-            userMoney.SetMoney(1000); // Reset to default starting money
-        }
+ 
+        PlayerSave.Instance.SetMoney(1000); // Reset to default starting money  ?????????? why is this needed?
+        
         
         // Save the reset state
+        /*
         if (playerSave != null)
         {
             playerSave.SavePlayerMoneyOnly();
         }
+        */
         
         Debug.Log("Game has been reset. All bets cleared and money reset.");
     }
+
+
 }

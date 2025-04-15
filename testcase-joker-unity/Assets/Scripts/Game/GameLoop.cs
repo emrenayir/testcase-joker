@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
-using System;
+using Game;
 
 /// <summary>
 /// This is the main class that controls the game loop.
@@ -9,96 +8,49 @@ using System;
 /// </summary>
 public class GameLoop : MonoBehaviour
 {
-    [SerializeField] private RouletteController rouletteController;
-    [SerializeField] private BetController betController;
-    [SerializeField] private UserMoney userMoney;
-    [SerializeField] private UIManager uiManager;
-    [SerializeField] private PlayerSave playerSave;
+    [SerializeField] private RouletteController rouletteController; //TODO: remove this dependency
+    [SerializeField] private BetController betController; //TODO: remove this dependency
+    [SerializeField] private ParticleSystem winParticles; //TODO: remove this dependency
 
-    [SerializeField] private ParticleSystem winParticles;
+    private GameState currentPhase;
 
-    // Win/Loss tracking
-    private int totalSpins = 0;
-    private int totalWins = 0;
-    private int totalProfit = 0;
-    private int currentRoundProfit = 0;
+    private EventBinding<BetPlacementConfirmedButtonEvent> betPlacementConfirmedBinding;
 
-    private enum GamePhase
+
+    void Awake()
     {
-        BetPlacement,
-        RouletteSpinning,
-        Results
-    }
-
-    private GamePhase currentPhase;
-
-    void Start()
-    {
-        if (uiManager != null)
-        {
-            uiManager.OnConfirmButtonClicked += OnBetPlacementConfirmed;
-            uiManager.OnResetBetButtonClicked += OnResetBetButtonClicked;
-        }
-        
-        // Load stats
-        if (playerSave != null)
-        {
-            var stats = playerSave.LoadPlayerStats();
-            
-            if (stats == null && betController != null)
-            {
-                stats = playerSave.LoadBets(betController);
-            }
-            
-            // Apply the loaded stats if available
-            if (stats != null)
-            {
-                totalSpins = stats.TotalSpins;
-                totalWins = stats.TotalWins;
-                totalProfit = stats.TotalProfit;
-            }
-        }
-        
-        // Update UI with initial stats
-        UpdateStatsUI();
-        
-        StartGame();
-    }
-
-    // Helper method to update stats UI
-    private void UpdateStatsUI()
-    {
-        if (uiManager != null)
-        {
-            uiManager.UpdateStatsDisplay(totalSpins, totalWins, totalProfit);
-        }
+        betPlacementConfirmedBinding = new EventBinding<BetPlacementConfirmedButtonEvent>(OnBetPlacementConfirmed);
+        EventBus<BetPlacementConfirmedButtonEvent>.Register(betPlacementConfirmedBinding);
     }
 
     void OnDestroy()
     {
-        if (uiManager != null)
-            uiManager.OnConfirmButtonClicked -= OnBetPlacementConfirmed;
+        EventBus<BetPlacementConfirmedButtonEvent>.UnRegister(betPlacementConfirmedBinding);
     }
 
-    public void StartGame()
+    void Start()
     {
-        // Start with chip selection phase
-        SetPhase(GamePhase.BetPlacement);
+        //Init player save TODO: Move to some other class idk where
+        var playerSave = PlayerSave.Instance;
+        SetPhase(GameState.InBet);
     }
 
-    private void SetPhase(GamePhase newPhase)
+    private void SetPhase(GameState newPhase)
     {
         currentPhase = newPhase;
         
+        // Raise event for state change
+        EventBus<GameStateChangeEvent>.Raise(new GameStateChangeEvent { NewState = newPhase });
+        
         switch (currentPhase)
         {
-            case GamePhase.BetPlacement:
+            case GameState.InBet:
                 EnterChipSelectionPhase();
                 break;
-            case GamePhase.RouletteSpinning:
+            case GameState.Running:
                 EnterRouletteSpinningPhase();
                 break;
-            case GamePhase.Results:
+            case GameState.Finish:
                 EnterResultsPhase();
                 break;
         }
@@ -106,36 +58,20 @@ public class GameLoop : MonoBehaviour
 
     private void EnterChipSelectionPhase()
     {
-        // Enable chip selection and betting
-        // Enable confirm button
-        if (uiManager != null)
-        {
-            uiManager.SetButtonActive(true);
-        }
-        
         betController.IsBettingEnabled = true;
     }
 
     private void EnterRouletteSpinningPhase()
     {
-        Debug.Log("Entering Roulette Spinning Phase");
-        // Disable chip selection and betting
-        betController.IsBettingEnabled = false;
-        if (uiManager != null)
-        {
-            uiManager.SetButtonActive(false);
-        }
-        
-        // Track the current bet amount for profit/loss calculation
-        currentRoundProfit = -userMoney.GetCurrentBet();
-        
-        // Increment total spins
-        totalSpins++;
-        
+         //TODO: Move to some other class its not the game loop responsibility
+        EventBus<OnCurrentRoundProfitChangedEvent>.Raise(new OnCurrentRoundProfitChangedEvent { CurrentRoundProfitChangeAmount = -PlayerSave.Instance.GetCurrentBet() });
+        EventBus<OnTotalSpinsChangedEvent>.Raise(new OnTotalSpinsChangedEvent {});
+
+
         // Start the roulette spinning and listen for completion
-        rouletteController.StartRoulette();
+        rouletteController.StartRoulette(); //Roullette will listen for state change and call StartRoulette()
         
-        // Start a coroutine to check when the roulette stops spinning
+        // Start a coroutine to check when the roulette stops spinning //instead of waiting for the coroutine we should listen for the event from roulette controller
         StartCoroutine(WaitForRouletteToComplete());
     }
 
@@ -147,57 +83,48 @@ public class GameLoop : MonoBehaviour
         
         
         // Move to results phase
-        SetPhase(GamePhase.Results);
+        SetPhase(GameState.Finish);
     }
 
     private void EnterResultsPhase()
     {
-        Debug.Log("Entering Results Phase");
-        
-        // Process the bet results
+        // Process the bet results is not the game loop responsibility
         StartCoroutine(ProcessResults());
     }
 
+    //TODO: Move to some other class its not the game loop responsibility
     private IEnumerator ProcessResults()
     {
         // Store initial money for win/loss calculation
-        int initialMoney = userMoney.GetCurrentMoney();
+        int initialMoney = PlayerSave.Instance.GetCurrentMoney();
         
         // Process the bet based on the winning number
         betController.ProcessResult(rouletteController.GetResult());
         
         // Calculate profit/loss for this round
-        int finalMoney = userMoney.GetCurrentMoney();
+        int finalMoney = PlayerSave.Instance.GetCurrentMoney();
         int winnings = finalMoney - initialMoney;
-        currentRoundProfit += winnings;
+
+
+
+        EventBus<OnCurrentRoundProfitChangedEvent>.Raise(new OnCurrentRoundProfitChangedEvent { CurrentRoundProfitChangeAmount = winnings });
         
         // Update stats
-        totalProfit += currentRoundProfit;
+        EventBus<OnTotalProfitChangedEvent>.Raise(new OnTotalProfitChangedEvent { ProfitChangeAmount = winnings });
         
         // Check if player won this round
-        if (currentRoundProfit > 0)
-        {
-            totalWins++;
-        }
-        
-        // Update UI
-        UpdateStatsUI();
-        
-        // Save stats
-        if (playerSave != null)
-        {
-            playerSave.SavePlayerStats(totalSpins, totalWins, totalProfit);
-        }
-        
         if (winnings > 0)
         {
+            EventBus<OnTotalWinsChangedEvent>.Raise(new OnTotalWinsChangedEvent { TotalWinsChangeAmount = 1 });
+
             SoundManager.Instance.PlaySFX("Win");
             winParticles.Play();
-        }
-        else
+        }else
         {
             SoundManager.Instance.PlaySFX("Error");
         }
+
+        
         // Wait for a moment before starting a new round
         yield return new WaitForSeconds(3f);
         
@@ -206,19 +133,15 @@ public class GameLoop : MonoBehaviour
         betController.ClearAllBets();
         
         // Return to chip selection phase
-        SetPhase(GamePhase.BetPlacement);
+        SetPhase(GameState.InBet);
     }
 
     // Button event handlers
     private void OnBetPlacementConfirmed()
     {
         // Player has confirmed their chip selection, move to next phase
-        SetPhase(GamePhase.RouletteSpinning);
+        SetPhase(GameState.Running);
     }
 
-    private void OnResetBetButtonClicked()
-    {
-        betController.ClearAllBets();
-    }
     
 }

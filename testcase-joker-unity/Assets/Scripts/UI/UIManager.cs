@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using Game;
 
 /// <summary>
 /// This is the main class that controls the UI of the game.
@@ -9,11 +10,8 @@ using TMPro;
 /// </summary>
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private UserMoney userMoney;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button addFreeChipsButton;
-
-    //[SerializeField] private Button undoBetButton; //TODO: implement this
     [SerializeField] private Button resetBetButton;
 
     [SerializeField] private TextMeshProUGUI betAmountText;
@@ -25,86 +23,100 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI totalWinsText;
     [SerializeField] private TextMeshProUGUI totalProfitText;
 
-    // Stats UI elements
-    
-    // Define events to communicate with other systems
-    public event Action OnConfirmButtonClicked;
-    public event Action OnRemoveBetButtonClicked;
-    public event Action OnResetBetButtonClicked;
-    
+
+    //Event binding for game state changes
+    private EventBinding<GameStateChangeEvent> gameStateBinding;
+    private EventBinding<UpdateStatsEvent> updateStatsBinding;
+    private EventBinding<OnMoneyChangedEvent> onMoneyChangedBinding;
+    private EventBinding<OnBetChangedEvent> onBetChangedBinding;
+    private EventBinding<OnPaymentChangedEvent> onPaymentChangedBinding;
+
 
     private void Awake()
     {
-        // Set up button listeners
-        if (confirmButton != null)
-            confirmButton.onClick.AddListener(OnBetPlacementConfirmed);
-            
-            
-        if (resetBetButton != null)
-            resetBetButton.onClick.AddListener(OnResetBetClicked);
+        //GameState 
+        gameStateBinding = new EventBinding<GameStateChangeEvent>(OnGameStateChanged);
+        EventBus<GameStateChangeEvent>.Register(gameStateBinding);
 
-        if (addFreeChipsButton != null)
-            addFreeChipsButton.onClick.AddListener(OnAddFreeChipsClicked);
+        //UpdateStats
+        updateStatsBinding = new EventBinding<UpdateStatsEvent>(UpdateStatsDisplay);
+        EventBus<UpdateStatsEvent>.Register(updateStatsBinding);
 
-        if (userMoney != null)
-        {
-            userMoney.OnMoneyChanged += OnUserMoneyChanged;
-            userMoney.OnBetChanged += OnBetAmountChanged;
-            userMoney.OnPaymentChanged += OnLastRoundEarningsChanged;
-        }
-    }
+        Debug.Log("UIManager Awake");
+        //Event binding for user money changes
+        onMoneyChangedBinding = new EventBinding<OnMoneyChangedEvent>(OnUserMoneyChanged);
+        EventBus<OnMoneyChangedEvent>.Register(onMoneyChangedBinding);
 
-    private void OnLastRoundEarningsChanged(int value)
-    {
-        lastRoundEarningsText.text = value.ToString();
-    }
+        onBetChangedBinding = new EventBinding<OnBetChangedEvent>(OnBetAmountChanged);
+        EventBus<OnBetChangedEvent>.Register(onBetChangedBinding);
 
-    private void OnAddFreeChipsClicked()
-    {
-        userMoney.AddFreeChips();
+        onPaymentChangedBinding = new EventBinding<OnPaymentChangedEvent>(OnLastRoundEarningsChanged);
+        EventBus<OnPaymentChangedEvent>.Register(onPaymentChangedBinding);
+
+
+        
+
     }
 
     private void OnDestroy()
     {
-        // Clean up listeners
-        if (confirmButton != null)
-            confirmButton.onClick.RemoveListener(OnBetPlacementConfirmed);
-            
-            
-        if (resetBetButton != null)
-            resetBetButton.onClick.RemoveListener(OnResetBetClicked);
+        EventBus<GameStateChangeEvent>.UnRegister(gameStateBinding);
+        EventBus<UpdateStatsEvent>.UnRegister(updateStatsBinding);
+        EventBus<OnMoneyChangedEvent>.UnRegister(onMoneyChangedBinding);
+        EventBus<OnBetChangedEvent>.UnRegister(onBetChangedBinding);
+        EventBus<OnPaymentChangedEvent>.UnRegister(onPaymentChangedBinding);
 
-        if (userMoney != null)
+    }
+
+    private void OnGameStateChanged(GameStateChangeEvent @event)
+    {
+        switch (@event.NewState)
         {
-            userMoney.OnMoneyChanged -= OnUserMoneyChanged;
-            userMoney.OnBetChanged -= OnBetAmountChanged;
-            userMoney.OnPaymentChanged -= OnLastRoundEarningsChanged;
+            case GameState.InBet:
+                SetButtonActive(true);
+                break;
+                
+            case GameState.Running:
+                SetButtonActive(false);
+                break;
+                
+            case GameState.Finish:
+                break;
         }
     }
 
-
-    private void OnBetAmountChanged(int value)
+    private void OnLastRoundEarningsChanged(OnPaymentChangedEvent @event)
     {
-        betAmountText.text = value.ToString();
+        lastRoundEarningsText.text = @event.Payment.ToString();
     }
 
-    private void OnUserMoneyChanged(int value)
+    public void OnAddFreeChipsClicked()
     {
-        userMoneyText.text = value.ToString();
+        EventBus<AddFreeChipsButtonClickedEvent>.Raise(new AddFreeChipsButtonClickedEvent());
+    }
+
+
+    private void OnBetAmountChanged(OnBetChangedEvent @event)
+    {
+        betAmountText.text = @event.Bet.ToString();
+    }
+
+    private void OnUserMoneyChanged(OnMoneyChangedEvent @event)
+    {
+        Debug.Log("OnUserMoneyChanged: " + @event.Money);
+        userMoneyText.text = @event.Money.ToString();
     }
 
     public void OnBetPlacementConfirmed()
     {
-        // Invoke the event for anyone listening
-        Debug.Log("OnBetPlacementConfirmed");
-        OnConfirmButtonClicked?.Invoke();
+        EventBus<BetPlacementConfirmedButtonEvent>.Raise(new BetPlacementConfirmedButtonEvent());
     }
-    
-    private void OnResetBetClicked()
+
+    public void OnResetBetClicked()
     {
-        OnResetBetButtonClicked?.Invoke();
+        EventBus<ResetBetButtonEvent>.Raise(new ResetBetButtonEvent());
     }
-    
+
     // Methods to control button visibility
     public void SetButtonActive(bool isActive)
     {
@@ -117,15 +129,15 @@ public class UIManager : MonoBehaviour
         if (addFreeChipsButton != null)
             addFreeChipsButton.gameObject.SetActive(isActive);
     }
-    
+
 
     /// <summary>
     /// Update the stats display with the current win/loss tracking information
     /// </summary>
-    public void UpdateStatsDisplay(int totalSpins, int totalWins, int totalProfit)
+    public void UpdateStatsDisplay(UpdateStatsEvent @event)
     {
-        totalSpinsText.text = totalSpins.ToString();
-        totalWinsText.text = totalWins.ToString();
-        totalProfitText.text = totalProfit.ToString();
+        totalSpinsText.text = @event.PlayerStatsData.TotalSpins.ToString();
+        totalWinsText.text = @event.PlayerStatsData.TotalWins.ToString();
+        totalProfitText.text = @event.PlayerStatsData.TotalProfit.ToString();
     }
 }

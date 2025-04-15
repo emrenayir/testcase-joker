@@ -23,7 +23,6 @@ public abstract class BetButton : MonoBehaviour, IBetButton
     protected Coroutine colorChangeCoroutine;
     protected BoxCollider cachedBoxCollider;
     protected BetController betController;
-    protected UserMoney userMoney;
 
     private int chipIndex = 0;
     private const int MAX_CHIPS = 20; // Maximum number of chips that can be placed on a single bet
@@ -69,11 +68,10 @@ public abstract class BetButton : MonoBehaviour, IBetButton
 
     #region Initialization
     //Configure the bet button
-    public void SetBetButton(ChipSelectionController chipSelectionController, BetController betController, UserMoney userMoney)
+    public void SetBetButton(ChipSelectionController chipSelectionController, BetController betController)
     {
         this.chipSelectionController = chipSelectionController;
         this.betController = betController;
-        this.userMoney = userMoney;
     }
     #endregion
 
@@ -108,7 +106,7 @@ public abstract class BetButton : MonoBehaviour, IBetButton
         if (!betController.IsBettingEnabled) return;
 
         // Check if we've reached the chip limit also check user money is enough
-        if (chipIndex >= MAX_CHIPS || ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue) > userMoney.GetCurrentMoney())
+        if (chipIndex >= MAX_CHIPS || ChipHelper.GetChipValue(chipSelectionController.SelectedChipValue) > PlayerSave.Instance.GetCurrentMoney())
         {
             return;
         } 

@@ -1,113 +1,279 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// This class handles saving and loading of bet data using JSON
+/// This class handles saving and loading of player data using PlayerPrefs
 /// </summary>
-public class PlayerSave : MonoBehaviour
+public class PlayerSave
 {
-    private string saveFilePath;
-    private string statsFilePath;
-    [SerializeField] private UserMoney userMoney;
+    // Keys for PlayerPrefs
+    private const string MONEY_KEY = "PlayerMoney";
+    private const string CURRENT_BET_KEY = "CurrentBet";
+    private const string LAST_PAYMENT_KEY = "LastPayment";
+    private const string TOTAL_SPINS_KEY = "TotalSpins";
+    private const string TOTAL_WINS_KEY = "TotalWins";
+    private const string TOTAL_PROFIT_KEY = "TotalProfit";
+    private const string ACTIVE_BETS_KEY = "ActiveBets";
 
-    private void Awake()
+
+    private EventBinding<OnTotalSpinsChangedEvent> onTotalSpinsChangedBinding;
+    private EventBinding<OnTotalWinsChangedEvent> onTotalWinsChangedBinding;
+    private EventBinding<OnTotalProfitChangedEvent> onTotalProfitChangedBinding;
+    private EventBinding<OnCurrentRoundProfitChangedEvent> onCurrentRoundProfitChangedBinding;
+
+    private int totalSpins = 0;
+    private int totalWins = 0;
+    private int totalProfit = 0;
+    private int currentRoundProfit = 0;
+    
+    // Player money properties
+    private int userMoney;
+    private int currentBet;
+    private int currentPayment;
+    
+    // Singleton instance
+    private static PlayerSave _instance;
+    public static PlayerSave Instance
     {
-        saveFilePath = Path.Combine(Application.persistentDataPath, "player_data.json");
-        statsFilePath = Path.Combine(Application.persistentDataPath, "player_stats.json");
-        Debug.Log($"Save file path: {saveFilePath}");
-    }
-
-    /// <summary>
-    /// Save the active bets to JSON file
-    /// </summary>
-    /// <param name="activeBets">List of active bet buttons</param>
-    public void SaveBets(List<BetButton> activeBets)
-    {
-        PlayerSaveData saveData = new PlayerSaveData();
-        
-        // If we have an existing save file, try to load stats from it first
-        if (File.Exists(saveFilePath))
+        get
         {
-            string existingJson = File.ReadAllText(saveFilePath);
-            PlayerSaveData existingData = JsonUtility.FromJson<PlayerSaveData>(existingJson);
-            if (existingData != null)
+            if (_instance == null)
             {
-                // Preserve stats data
-                saveData.TotalSpins = existingData.TotalSpins;
-                saveData.TotalWins = existingData.TotalWins;
-                saveData.TotalProfit = existingData.TotalProfit;
+                _instance = new PlayerSave();
             }
+            return _instance;
         }
-        
-        // Load latest stats data if available
-        PlayerStatsData statsData = LoadPlayerStats();
-        if (statsData != null)
-        {
-            saveData.TotalSpins = statsData.TotalSpins;
-            saveData.TotalWins = statsData.TotalWins;
-            saveData.TotalProfit = statsData.TotalProfit;
-        }
-        
-        // Save bets data
-        if (activeBets != null && activeBets.Count > 0)
-        {
-            foreach (var bet in activeBets)
-            {
-                BetData betData = new BetData
-                {
-                    BetButtonName = bet.gameObject.name,
-                    BetType = bet.GetBetType().ToString(),
-                    TotalChipValue = bet.TotalChipValue,
-                    PlacedChipsData = bet.GetPlacedChipsData()
-                };
-
-                saveData.Bets.Add(betData);
-            }
-        }
-        
-        // Save player money data
-        if (userMoney != null)
-        {
-            saveData.PlayerMoney = userMoney.GetCurrentMoney();
-            saveData.CurrentBet = userMoney.GetCurrentBet();
-            saveData.LastRoundEarnings = userMoney.GetCurrentPayment();
-        }
-
-        string jsonData = JsonUtility.ToJson(saveData, true);
-        File.WriteAllText(saveFilePath, jsonData);
     }
     
-
-    [ContextMenu("ClearSavedBets")]
-    /// <summary>
-    /// Clear all saved data by deleting the save file
-    /// </summary>
-    public void ClearSavedBets()
+    // Constructor
+    private PlayerSave()
     {
-        if (File.Exists(saveFilePath))
+        Debug.Log("PlayerSave constructor");
+        LoadPlayerData();
+    }
+    
+    // Load player data from PlayerPrefs
+    private void LoadPlayerData()
+    {
+        Debug.Log("LoadPlayerData");
+        userMoney = PlayerPrefs.GetInt(MONEY_KEY, 1000); // Default starting money is 1000
+        Debug.Log("userMoney: " + userMoney);
+        currentBet = PlayerPrefs.GetInt(CURRENT_BET_KEY, 0);
+        currentPayment = PlayerPrefs.GetInt(LAST_PAYMENT_KEY, 0);
+
+        totalSpins = PlayerPrefs.GetInt(TOTAL_SPINS_KEY, 0);
+        totalWins = PlayerPrefs.GetInt(TOTAL_WINS_KEY, 0);
+        totalProfit = PlayerPrefs.GetInt(TOTAL_PROFIT_KEY, 0);
+        
+        // Notify UI of initial values
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
+
+        onTotalSpinsChangedBinding = new EventBinding<OnTotalSpinsChangedEvent>(OnTotalSpinsChanged);
+        EventBus<OnTotalSpinsChangedEvent>.Register(onTotalSpinsChangedBinding);
+
+        onTotalWinsChangedBinding = new EventBinding<OnTotalWinsChangedEvent>(OnTotalWinsChanged);
+        EventBus<OnTotalWinsChangedEvent>.Register(onTotalWinsChangedBinding);
+
+        onTotalProfitChangedBinding = new EventBinding<OnTotalProfitChangedEvent>(OnTotalProfitChanged);
+        EventBus<OnTotalProfitChangedEvent>.Register(onTotalProfitChangedBinding);
+
+        onCurrentRoundProfitChangedBinding = new EventBinding<OnCurrentRoundProfitChangedEvent>(OnCurrentRoundProfitChanged);
+        EventBus<OnCurrentRoundProfitChangedEvent>.Register(onCurrentRoundProfitChangedBinding);
+        
+
+        
+        // Load and notify stats
+        PlayerStatsData stats = LoadPlayerStats();
+        if (stats != null)
         {
-            File.Delete(saveFilePath);
+            EventBus<UpdateStatsEvent>.Raise(new UpdateStatsEvent { PlayerStatsData = stats });
         }
+        
     }
 
-    /// <summary>
-    /// Load saved bets from JSON and restore them to the game
-    /// </summary>
-    /// <param name="betController">Reference to the bet controller</param>
-    /// <returns>PlayerStatsData object containing stored stats, or null if no data</returns>
+    private void OnCurrentRoundProfitChanged(OnCurrentRoundProfitChangedEvent @event)
+    {
+        currentRoundProfit = @event.CurrentRoundProfitChangeAmount;
+        OnUpdateStats();
+    }
+
+    private void OnTotalProfitChanged(OnTotalProfitChangedEvent @event)
+    {
+        totalProfit += @event.ProfitChangeAmount;
+        OnUpdateStats();
+    }
+
+    private void OnTotalWinsChanged(OnTotalWinsChangedEvent @event)
+    {
+        totalWins += @event.TotalWinsChangeAmount;
+        OnUpdateStats();
+    }
+
+    private void OnTotalSpinsChanged(OnTotalSpinsChangedEvent @event)
+    {
+        totalSpins++;
+        OnUpdateStats();
+    }
+
+    private void OnUpdateStats()
+    {
+        EventBus<UpdateStatsEvent>.Raise(new UpdateStatsEvent { PlayerStatsData = new PlayerStatsData { TotalSpins = totalSpins, TotalWins = totalWins, TotalProfit = totalProfit } });
+        SavePlayerStats(totalSpins, totalWins, totalProfit);
+    }
+
+    // Money Management Methods
+
+    public bool PlaceBet(int chipValue)
+    {
+        if (chipValue <= userMoney && chipValue > 0)
+        {
+            userMoney -= chipValue;
+            currentBet += chipValue;
+            
+            PlayerPrefs.SetInt(MONEY_KEY, userMoney);
+            PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
+            PlayerPrefs.Save();
+            
+            EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+            EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+            return true;
+        }
+        return false;
+    }
+    
+    public void ProcessPayment(int payment, int lostBets)
+    {
+        currentPayment = payment + (currentBet - lostBets);
+        currentBet = 0;
+        
+        if (payment > 0)
+        {
+            userMoney += currentPayment;
+        }
+        
+        PlayerPrefs.SetInt(MONEY_KEY, userMoney);
+        PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
+        PlayerPrefs.SetInt(LAST_PAYMENT_KEY, currentPayment);
+        PlayerPrefs.Save();
+        
+        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
+        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+        
+        Debug.Log($"Player money updated with payment: {payment}! Current payment set to: {currentPayment}");
+    }
+    
+    public void AddFreeChips(int amount = 1000)
+    {
+        userMoney += amount;
+        PlayerPrefs.SetInt(MONEY_KEY, userMoney);
+        PlayerPrefs.Save();
+        
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+    }
+    
+    public void ResetBet()
+    {
+        userMoney += currentBet;
+        currentBet = 0;
+        
+        PlayerPrefs.SetInt(MONEY_KEY, userMoney);
+        PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
+        PlayerPrefs.Save();
+        
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+    }
+    
+    // Getters
+    public int GetCurrentMoney() => userMoney;
+    public int GetCurrentBet() => currentBet;
+    public int GetCurrentPayment() => currentPayment;
+    
+    // Setters (for loading saved data)
+    public void SetMoney(int amount)
+    {
+        userMoney = Mathf.Max(0, amount);
+        PlayerPrefs.SetInt(MONEY_KEY, userMoney);
+        PlayerPrefs.Save();
+        
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+        Debug.Log($"Player money set to: {userMoney}");
+    }
+    
+    public void SetCurrentBet(int amount)
+    {
+        currentBet = Mathf.Max(0, amount);
+        PlayerPrefs.SetInt(CURRENT_BET_KEY, currentBet);
+        PlayerPrefs.Save();
+        
+        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+        Debug.Log($"Current bet set to: {currentBet}");
+    }
+    
+    public void SetCurrentPayment(int amount)
+    {
+        currentPayment = amount;
+        PlayerPrefs.SetInt(LAST_PAYMENT_KEY, currentPayment);
+        PlayerPrefs.Save();
+        
+        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
+        Debug.Log($"Last round earnings set to: {currentPayment}");
+    }
+    
+    // Bet Data Management
+    
+    public void SaveBets(List<BetButton> activeBets)
+    {
+        if (activeBets == null || activeBets.Count == 0)
+        {
+            PlayerPrefs.DeleteKey(ACTIVE_BETS_KEY);
+            PlayerPrefs.Save();
+            return;
+        }
+        
+        PlayerSaveData saveData = new PlayerSaveData
+        {
+            PlayerMoney = userMoney,
+            CurrentBet = currentBet,
+            LastRoundEarnings = currentPayment,
+            TotalSpins = PlayerPrefs.GetInt(TOTAL_SPINS_KEY, 0),
+            TotalWins = PlayerPrefs.GetInt(TOTAL_WINS_KEY, 0),
+            TotalProfit = PlayerPrefs.GetInt(TOTAL_PROFIT_KEY, 0)
+        };
+        
+        foreach (var bet in activeBets)
+        {
+            BetData betData = new BetData
+            {
+                BetButtonName = bet.gameObject.name,
+                BetType = bet.GetBetType().ToString(),
+                TotalChipValue = bet.TotalChipValue,
+                PlacedChipsData = bet.GetPlacedChipsData()
+            };
+            
+            saveData.Bets.Add(betData);
+        }
+        
+        string jsonData = JsonUtility.ToJson(saveData);
+        PlayerPrefs.SetString(ACTIVE_BETS_KEY, jsonData);
+        PlayerPrefs.Save();
+    }
+    
     public PlayerStatsData LoadBets(BetController betController)
     {
-        if (!File.Exists(saveFilePath))
+        if (!PlayerPrefs.HasKey(ACTIVE_BETS_KEY))
         {
-            Debug.Log("No saved data found");
+            Debug.Log("No saved bet data found");
             return null;
         }
-
-        string jsonData = File.ReadAllText(saveFilePath);
+        
+        string jsonData = PlayerPrefs.GetString(ACTIVE_BETS_KEY);
         PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(jsonData);
-
+        
         if (saveData == null)
         {
             Debug.Log("No valid save data found");
@@ -115,108 +281,62 @@ public class PlayerSave : MonoBehaviour
         }
         
         // Load player money data
-        if (userMoney != null)
+        if (saveData.PlayerMoney > 0)
         {
-            if (saveData.PlayerMoney > 0)
-            {
-                userMoney.SetMoney(saveData.PlayerMoney);
-            }
-            
-            if (saveData.CurrentBet > 0)
-            {
-                userMoney.SetCurrentBet(saveData.CurrentBet);
-            }
-            
-            // Load last round earnings
-            userMoney.SetCurrentPayment(saveData.LastRoundEarnings);
+            SetMoney(saveData.PlayerMoney);
         }
-
+        
+        if (saveData.CurrentBet > 0)
+        {
+            SetCurrentBet(saveData.CurrentBet);
+        }
+        
+        SetCurrentPayment(saveData.LastRoundEarnings);
+        
         // Load bets data
-        if (saveData.Bets == null || saveData.Bets.Count == 0)
-        {
-            Debug.Log("No bet data found in save file");
-        }
-        else
+        if (saveData.Bets != null && saveData.Bets.Count > 0)
         {
             List<BetButton> betButtons = betController.GetBetButtons();
-
-            int loadedBetsCount = 0;
+            
             foreach (var betData in saveData.Bets)
             {
-                // Find the bet button by name
                 BetButton betButton = betButtons.Find(b => b.gameObject.name == betData.BetButtonName);
                 if (betButton != null)
                 {
                     betButton.LoadBetData(betData);
-                    loadedBetsCount++;
                 }
             }
         }
         
         // Return stats data
-        PlayerStatsData statsData = new PlayerStatsData
+        return new PlayerStatsData
         {
             TotalSpins = saveData.TotalSpins,
             TotalWins = saveData.TotalWins,
             TotalProfit = saveData.TotalProfit
         };
-        
-        
-        
-        return statsData;
     }
     
-    /// <summary>
-    /// Save only the player money data
-    /// </summary>
-    public void SavePlayerMoneyOnly()
+    public void ClearSavedBets()
     {
-        if (userMoney == null) return;
-        
-        // If save file exists, load it first to preserve bet data
-        PlayerSaveData saveData = new PlayerSaveData();
-        if (File.Exists(saveFilePath))
-        {
-            string jsonData = File.ReadAllText(saveFilePath);
-            saveData = JsonUtility.FromJson<PlayerSaveData>(jsonData);
-            
-            if (saveData == null)
-            {
-                saveData = new PlayerSaveData();
-            }
-        }
-        
-        // Update money data
-        saveData.PlayerMoney = userMoney.GetCurrentMoney();
-        saveData.CurrentBet = userMoney.GetCurrentBet();
-        saveData.LastRoundEarnings = userMoney.GetCurrentPayment();
-        
-        // Save back to file
-        string updatedJsonData = JsonUtility.ToJson(saveData, true);
-        File.WriteAllText(saveFilePath, updatedJsonData);
+        PlayerPrefs.DeleteKey(ACTIVE_BETS_KEY);
+        PlayerPrefs.Save();
     }
     
-    /// <summary>
-    /// Save player stats (wins, losses, etc)
-    /// </summary>
+    // Stats Management
+    
     public void SavePlayerStats(int totalSpins, int totalWins, int totalProfit)
     {
-        // Save to dedicated stats file
-        PlayerStatsData statsData = new PlayerStatsData
-        {
-            TotalSpins = totalSpins,
-            TotalWins = totalWins,
-            TotalProfit = totalProfit
-        };
+        PlayerPrefs.SetInt(TOTAL_SPINS_KEY, totalSpins);
+        PlayerPrefs.SetInt(TOTAL_WINS_KEY, totalWins);
+        PlayerPrefs.SetInt(TOTAL_PROFIT_KEY, totalProfit);
+        PlayerPrefs.Save();
         
-        string jsonData = JsonUtility.ToJson(statsData, true);
-        File.WriteAllText(statsFilePath, jsonData);
-        
-        // Also update the main save file if it exists
-        if (File.Exists(saveFilePath))
+        // Update active bets data if exists
+        if (PlayerPrefs.HasKey(ACTIVE_BETS_KEY))
         {
-            string existingJson = File.ReadAllText(saveFilePath);
-            PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(existingJson);
+            string jsonData = PlayerPrefs.GetString(ACTIVE_BETS_KEY);
+            PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(jsonData);
             
             if (saveData != null)
             {
@@ -224,39 +344,49 @@ public class PlayerSave : MonoBehaviour
                 saveData.TotalWins = totalWins;
                 saveData.TotalProfit = totalProfit;
                 
-                string updatedJson = JsonUtility.ToJson(saveData, true);
-                File.WriteAllText(saveFilePath, updatedJson);
+                PlayerPrefs.SetString(ACTIVE_BETS_KEY, JsonUtility.ToJson(saveData));
+                PlayerPrefs.Save();
             }
         }
     }
     
-    /// <summary>
-    /// Load player stats
-    /// </summary>
-    /// <returns>PlayerStatsData object or null if no data exists</returns>
     public PlayerStatsData LoadPlayerStats()
     {
-        if (!File.Exists(statsFilePath))
+        if (!PlayerPrefs.HasKey(TOTAL_SPINS_KEY))
         {
             return null;
         }
         
-        string jsonData = File.ReadAllText(statsFilePath);
-        PlayerStatsData statsData = JsonUtility.FromJson<PlayerStatsData>(jsonData);
-        
-        return statsData;
+        return new PlayerStatsData
+        {
+            TotalSpins = PlayerPrefs.GetInt(TOTAL_SPINS_KEY, 0),
+            TotalWins = PlayerPrefs.GetInt(TOTAL_WINS_KEY, 0),
+            TotalProfit = PlayerPrefs.GetInt(TOTAL_PROFIT_KEY, 0)
+        };
     }
     
-    [ContextMenu("ClearPlayerStats")]
-    /// <summary>
-    /// Clear player stats by deleting the stats file
-    /// </summary>
     public void ClearPlayerStats()
     {
-        if (File.Exists(statsFilePath))
-        {
-            File.Delete(statsFilePath);
-        }
+        PlayerPrefs.DeleteKey(TOTAL_SPINS_KEY);
+        PlayerPrefs.DeleteKey(TOTAL_WINS_KEY);
+        PlayerPrefs.DeleteKey(TOTAL_PROFIT_KEY);
+        PlayerPrefs.Save();
+    }
+    
+    public void ClearAllData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        
+        // Reset current values
+        userMoney = 1000;
+        currentBet = 0;
+        currentPayment = 0;
+        
+        // Update UI
+        EventBus<OnMoneyChangedEvent>.Raise(new OnMoneyChangedEvent { Money = userMoney });
+        EventBus<OnBetChangedEvent>.Raise(new OnBetChangedEvent { Bet = currentBet });
+        EventBus<OnPaymentChangedEvent>.Raise(new OnPaymentChangedEvent { Payment = currentPayment });
     }
 }
 
@@ -296,4 +426,4 @@ public class PlayerStatsData
     public int TotalSpins = 0;
     public int TotalWins = 0;
     public int TotalProfit = 0;
-} 
+}
